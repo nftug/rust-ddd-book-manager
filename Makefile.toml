@@ -1,0 +1,70 @@
+[config]
+default_to_workspace = false
+
+[env]
+HOST = "0.0.0.0"
+PORT = 8080
+DATABASE_PORT_INNER = 5432
+DATABASE_PORT_OUTER = 5432
+
+[tasks.set-env-local.env]
+DATABASE_USER = "book-manager"
+DATABASE_PASSWORD = "password"
+DATABASE_NAME = "book-db"
+DATABASE_HOST = "localhost"
+DATABASE_PORT = "${DATABASE_PORT_OUTER}"
+DATABASE_URL = "postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}?user=${DATABASE_USER}&password=${DATABASE_PASSWORD}"
+KEYCLOAK_PORT_OUTER = 8081
+OIDC_AUTHORITY = "http://localhost:${KEYCLOAK_PORT_OUTER}/realms/book-manager"
+OIDC_CLIENT_ID = "book-manager"
+
+[tasks.before-build]
+run_task = [{ name = ["compose-up", "migrate"] }]
+
+[tasks.compose-up]
+extend = "set-env-local"
+command = "docker"
+args = ["compose", "up", "-d"]
+
+[tasks.migrate]
+install_crate = { crate_name = "sea-orm-cli", binary = "sea-orm-cli", test_arg = "--help" }
+dependencies = ["compose-up"]
+extend = "set-env-local"
+command = "sea-orm-cli"
+args = ["migrate", "up", "-u", "${DATABASE_URL}", "-d", "migration"]
+
+[tasks.generate-entity]
+install_crate = { crate_name = "sea-orm-cli", binary = "sea-orm-cli", test_arg = "--help" }
+dependencies = ["before-build"]
+extend = "set-env-local"
+command = "sea-orm-cli"
+args = [
+    "generate",
+    "entity",
+    "-u",
+    "${DATABASE_URL}",
+    "-o",
+    "infrastructure/src/database/entity",
+]
+
+[tasks.run]
+extend = "set-env-local"
+dependencies = ["before-build"]
+command = "cargo"
+args = ["run"]
+
+[tasks.check]
+extend = "set-env-local"
+command = "cargo"
+args = ["clippy", "--all", "--all-targets", "${@}"]
+
+[tasks.test]
+extend = "set-env-local"
+command = "cargo"
+args = ["test", "--all-features"]
+
+[tasks.sea-orm]
+extend = "set-env-local"
+install_crate = { crate_name = "sea-orm-cli", binary = "sea-orm-cli", test_arg = "--help" }
+command = "sea-orm-cli"
+args = ["${@}"]
