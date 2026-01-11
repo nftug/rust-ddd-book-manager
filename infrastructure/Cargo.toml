@@ -1,0 +1,27 @@
+[package]
+name = "infrastructure"
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+strum.workspace = true
+uuid.workspace = true
+chrono.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+derive-new.workspace = true
+itertools.workspace = true
+serde.workspace = true
+
+sea-orm = { version = "1.1", features = [
+    "runtime-tokio-rustls",
+    "sqlx-postgres",
+    "uuid",
+    "chrono",
+    "macros",
+] }
+sea-orm-migration = { version = "1.1", features = [
+    "runtime-tokio-rustls",
+    "sqlx-postgres",
+] }

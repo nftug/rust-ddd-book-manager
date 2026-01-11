@@ -1,0 +1,31 @@
+[package]
+name = "ddd-book-manager"
+version = "0.1.0"
+edition = "2024"
+
+[[bin]]
+name = "app"
+path = "api/src/main.rs"
+
+[workspace]
+members = ["api", "application", "domain", "infrastructure", "migration"]
+
+[workspace.package]
+edition = "2024"
+publish = false
+license = "MIT"
+
+[workspace.dependencies]
+api = { path = "./api" }
+application = { path = "./application" }
+domain = { path = "./domain" }
+infrastructure = { path = "./infrastructure" }
+
+derive-new = "0.7.0"
+serde = { version = "1.0.228", features = ["derive"] }
+uuid = { version = "1.19.0", features = ["v4", "serde"] }
+chrono = { version = "0.4.26", default-features = false, features = ["serde"] }
+thiserror = "2.0.17"
+strum = { version = "0.27.2", features = ["derive"] }
+itertools = "0.14.0"
+tracing = { version = "0.1.44", features = ["log"] }
