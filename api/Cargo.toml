@@ -5,6 +5,10 @@ license.workspace = true
 publish.workspace = true
 
 [dependencies]
+domain.workspace = true
+application.workspace = true
+infrastructure.workspace = true
+
 strum.workspace = true
 uuid.workspace = true
 chrono.workspace = true
