@@ -9,16 +9,10 @@ pub struct AuditContext {
 }
 
 impl AuditContext {
-    pub fn new<C: Clock>(actor: Actor, clock: &C) -> Self {
+    pub fn new(actor: Actor, clock: &dyn Clock) -> Self {
         AuditContext {
             actor,
             timestamp: clock.now(),
         }
-    }
-}
-
-impl From<AuditContext> for Actor {
-    fn from(context: AuditContext) -> Self {
-        context.actor
     }
 }

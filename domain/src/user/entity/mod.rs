@@ -31,12 +31,13 @@ impl User {
 
     pub fn create_new(
         context: &AuditContext,
+        user_id: values::UserId,
         name: values::UserName,
         email: values::UserEmail,
         role: enums::UserRole,
     ) -> Result<Self, DomainError> {
         let permission = PassThroughPermission::new();
-        let audit = EntityAudit::create_new(context, &permission)?;
+        let audit = EntityAudit::create_new_with_id(context, &permission, user_id)?;
 
         Ok(User {
             audit,

@@ -2,7 +2,7 @@ use derive_new::new;
 
 use crate::{
     shared::error::DomainError,
-    user::{UserId, UserReference},
+    user::values::{UserId, UserReference},
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, new)]

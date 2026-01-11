@@ -4,11 +4,7 @@ use async_trait::async_trait;
 use derive_new::new;
 use domain::{
     shared::{Id, error::PersistenceError},
-    user::{
-        User, UserId, UserRole,
-        interface::UserRepository,
-        values::{UserEmail, UserName},
-    },
+    user::{entity::User, enums::UserRole, interface::UserRepository, values::*},
 };
 use sea_orm::{ActiveValue::Set, EntityTrait};
 

@@ -15,3 +15,6 @@ tracing.workspace = true
 derive-new.workspace = true
 itertools.workspace = true
 serde.workspace = true
+async-trait.workspace = true
+
+garde = { version = "0.22.1", features = ["derive"] }

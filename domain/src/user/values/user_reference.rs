@@ -1,11 +1,11 @@
 use derive_new::new;
 
-use crate::user::values::UserId;
+use crate::user::values::{UserId, UserName};
 
 #[derive(new, Debug, Clone, PartialEq, Eq)]
 pub struct UserReference {
     id: UserId,
-    name: String,
+    name: UserName,
 }
 
 impl UserReference {
@@ -13,6 +13,6 @@ impl UserReference {
         self.id
     }
     pub fn name(&self) -> &str {
-        &self.name
+        self.name.raw()
     }
 }

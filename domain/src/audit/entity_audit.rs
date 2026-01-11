@@ -5,7 +5,7 @@ use crate::{
     audit::AuditContext,
     auth::permission::Permission,
     shared::{Id, error::DomainError},
-    user::UserReference,
+    user::values::UserReference,
 };
 
 #[derive(new, Debug, PartialEq, Eq)]
@@ -42,12 +42,20 @@ impl<EId: Id> EntityAudit<EId> {
         context: &AuditContext,
         permission: &dyn Permission,
     ) -> Result<Self, DomainError> {
+        Self::create_new_with_id(context, permission, EId::new())
+    }
+
+    pub fn create_new_with_id(
+        context: &AuditContext,
+        permission: &dyn Permission,
+        id: EId,
+    ) -> Result<Self, DomainError> {
         if !permission.can_create() {
             return Err(DomainError::Forbidden);
         }
 
         Ok(EntityAudit {
-            id: EId::new(),
+            id,
             created_at: context.timestamp,
             created_by: context.actor.user.clone(),
             updated_at: None,

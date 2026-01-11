@@ -3,19 +3,41 @@ macro_rules! hydrate_audit {
         domain::audit::EntityAudit::<$id_type>::new(
             $model.id.into(),
             $model.created_at.into(),
-            domain::user::UserReference::new(
+            domain::user::values::UserReference::new(
                 $model.created_by_id.into(),
-                $model.created_by_name.clone(),
+                domain::user::values::UserName::new($model.created_by_name.clone()),
             ),
             $model.updated_at.map(|dt| dt.into()),
             $model.updated_by_id.map(|id| {
-                domain::user::UserReference::new(
+                domain::user::values::UserReference::new(
                     id.into(),
-                    $model.updated_by_name.clone().unwrap_or_default(),
+                    domain::user::values::UserName::new(
+                        $model.updated_by_name.clone().unwrap_or_default(),
+                    ),
                 )
             }),
             false,
         )
+    };
+}
+
+macro_rules! hydrate_audit_dto {
+    ($model:expr, $permission:expr) => {
+        application::shared::AuditResponseDTO {
+            created_at: $model.created_at.into(),
+            created_by: application::shared::UserReferenceDTO {
+                id: $model.created_by_id.into(),
+                name: $model.created_by_name.clone(),
+            },
+            updated_at: $model.updated_at.map(|dt| dt.into()),
+            updated_by: $model
+                .updated_by_id
+                .map(|id| application::shared::UserReferenceDTO {
+                    id,
+                    name: $model.updated_by_name.clone().unwrap_or_default(),
+                }),
+            permission: ($permission as &dyn domain::auth::permission::Permission).into(),
+        }
     };
 }
 
@@ -47,3 +69,4 @@ macro_rules! audit_defaults_update {
 pub(crate) use audit_defaults;
 pub(crate) use audit_defaults_update;
 pub(crate) use hydrate_audit;
+pub(crate) use hydrate_audit_dto;

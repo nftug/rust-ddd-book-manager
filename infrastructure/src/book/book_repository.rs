@@ -1,13 +1,8 @@
 use async_trait::async_trait;
 use derive_new::new;
 use domain::{
-    book::{
-        entity::Book,
-        interface::BookRepository,
-        values::{BookAuthor, BookDescription, BookId, BookIsbn, BookOwner, BookTitle},
-    },
+    book::{entity::Book, interface::BookRepository, values::*},
     shared::{Id, error::PersistenceError},
-    user::UserReference,
 };
 use sea_orm::{ActiveValue::Set, EntityTrait};
 
@@ -15,7 +10,7 @@ use crate::{
     database::{
         ConnectionPool,
         entity::{books, users},
-        row::user_row,
+        row::user_row::UserReferenceRow,
     },
     macros::{audit_defaults, audit_defaults_update, hydrate_audit},
 };
@@ -28,7 +23,7 @@ pub struct BookRepositoryImpl {
 #[async_trait]
 impl BookRepository for BookRepositoryImpl {
     async fn find(&self, id: BookId) -> Result<Option<Book>, PersistenceError> {
-        let result: Option<(books::Model, Option<user_row::UserReferenceRow>)> =
+        let result: Option<(books::Model, Option<UserReferenceRow>)> =
             books::Entity::find_by_id(id.raw())
                 .inner_join(users::Entity)
                 .select_also(users::Entity)
@@ -46,7 +41,7 @@ impl BookRepository for BookRepositoryImpl {
                     BookAuthor::new(book.author),
                     BookIsbn::new(book.isbn),
                     BookDescription::new(book.description),
-                    BookOwner::new(UserReference::new(owner.id.into(), owner.name)),
+                    BookOwner::new(owner.into()),
                 )))
             }
             _ => Ok(None),

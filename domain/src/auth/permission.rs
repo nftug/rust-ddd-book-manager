@@ -1,9 +1,6 @@
 use derive_new::new;
 
-use crate::{
-    auth::Actor,
-    user::{UserId, UserRole},
-};
+use crate::{auth::Actor, user::enums::UserRole, user::values::UserId};
 
 pub trait Permission {
     fn can_create(&self) -> bool;

@@ -2,10 +2,10 @@ use derive_new::new;
 
 use crate::{
     audit::{AuditContext, EntityAudit},
-    auth::permission::{AdminPermission, EntityPermission, PassThroughPermission},
+    auth::permission::{AdminPermission, EntityPermission, Permission},
     book::values,
     shared::error::DomainError,
-    user::UserReference,
+    user::values::UserReference,
 };
 
 #[derive(Debug, PartialEq, Eq, new)]
@@ -44,8 +44,9 @@ impl Book {
         author: values::BookAuthor,
         isbn: values::BookIsbn,
         description: values::BookDescription,
+        owner: values::BookOwner,
     ) -> Result<Self, DomainError> {
-        let permission = PassThroughPermission::new();
+        let permission = EntityPermission::new(context.actor.clone(), owner.id());
         let audit = EntityAudit::create_new(context, &permission)?;
 
         Ok(Book {
@@ -54,7 +55,7 @@ impl Book {
             author,
             isbn,
             description,
-            owner: values::BookOwner::new(context.actor.user.clone()),
+            owner,
         })
     }
 
@@ -77,6 +78,15 @@ impl Book {
             description,
             ..self
         })
+    }
+
+    pub fn validate_deletion(&self, context: &AuditContext) -> Result<(), DomainError> {
+        let permission = EntityPermission::new(context.actor.clone(), self.audit.created_by().id());
+        if !permission.can_delete() {
+            return Err(DomainError::Forbidden);
+        }
+
+        Ok(())
     }
 
     pub fn change_owner(

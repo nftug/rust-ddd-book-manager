@@ -2,7 +2,7 @@ use async_trait::async_trait;
 
 use crate::{
     shared::error::PersistenceError,
-    user::{User, UserId},
+    user::{entity::User, values::UserId},
 };
 
 #[async_trait]
