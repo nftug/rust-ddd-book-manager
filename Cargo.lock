@@ -97,8 +97,11 @@ dependencies = [
 name = "api"
 version = "0.0.0"
 dependencies = [
+ "application",
  "chrono",
  "derive-new",
+ "domain",
+ "infrastructure",
  "itertools",
  "serde",
  "strum 0.27.2",
@@ -113,6 +116,7 @@ version = "0.0.0"
 dependencies = [
  "chrono",
  "derive-new",
+ "domain",
  "itertools",
  "serde",
  "strum 0.27.2",
@@ -1228,8 +1232,10 @@ dependencies = [
 name = "infrastructure"
 version = "0.0.0"
 dependencies = [
+ "application",
  "chrono",
  "derive-new",
+ "domain",
  "itertools",
  "sea-orm",
  "sea-orm-migration",
