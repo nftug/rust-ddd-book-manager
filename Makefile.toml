@@ -8,12 +8,12 @@ DATABASE_PORT_INNER = 5432
 DATABASE_PORT_OUTER = 5432
 
 [tasks.set-env-local.env]
-DATABASE_USER = "book-manager"
+DATABASE_USERNAME = "book-manager"
 DATABASE_PASSWORD = "password"
 DATABASE_NAME = "book-db"
 DATABASE_HOST = "localhost"
 DATABASE_PORT = "${DATABASE_PORT_OUTER}"
-DATABASE_URL = "postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}?user=${DATABASE_USER}&password=${DATABASE_PASSWORD}"
+DATABASE_URL = "postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}?user=${DATABASE_USERNAME}&password=${DATABASE_PASSWORD}"
 KEYCLOAK_PORT_OUTER = 8081
 OIDC_AUTHORITY = "http://localhost:${KEYCLOAK_PORT_OUTER}/realms/book-manager"
 OIDC_CLIENT_ID = "book-manager"
@@ -25,6 +25,11 @@ run_task = [{ name = ["compose-up", "migrate"] }]
 extend = "set-env-local"
 command = "docker"
 args = ["compose", "up", "-d"]
+
+[tasks.compose-down]
+extend = "set-env-local"
+command = "docker"
+args = ["compose", "down"]
 
 [tasks.migrate]
 install_crate = { crate_name = "sea-orm-cli", binary = "sea-orm-cli", test_arg = "--help" }

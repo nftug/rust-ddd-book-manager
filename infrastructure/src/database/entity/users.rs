@@ -11,10 +11,10 @@ pub struct Model {
     pub role: String,
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub created_at: DateTime,
+    pub created_at: DateTimeWithTimeZone,
     pub created_by_id: Uuid,
     pub created_by_name: String,
-    pub updated_at: Option<DateTime>,
+    pub updated_at: Option<DateTimeWithTimeZone>,
     pub updated_by_id: Option<Uuid>,
     pub updated_by_name: Option<String>,
 }

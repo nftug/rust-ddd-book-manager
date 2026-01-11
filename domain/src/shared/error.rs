@@ -9,3 +9,15 @@ pub enum DomainError {
     #[error("Forbidden")]
     Forbidden,
 }
+
+#[derive(Error, Debug)]
+pub enum PersistenceError {
+    #[error("Database operation failed")]
+    OperationError,
+    #[error("Transaction error")]
+    TransactionError,
+    #[error("Entity not found")]
+    NotFound,
+    #[error("{0}")]
+    EntityConversionError(String),
+}

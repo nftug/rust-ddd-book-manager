@@ -2,22 +2,42 @@ use derive_new::new;
 
 use crate::{
     audit::{AuditContext, EntityAudit},
-    auth::permission::{AdminPermission, PassThroughPermission},
+    auth::permission::{AdminPermission, EntityPermission, PassThroughPermission},
     book::values,
     shared::error::DomainError,
+    user::UserReference,
 };
 
-#[derive(Debug, new, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, new)]
 pub struct Book {
-    pub audit: EntityAudit<values::BookId>,
-    pub title: values::BookTitle,
-    pub author: values::BookAuthor,
-    pub isbn: values::BookIsbn,
-    pub description: values::BookDescription,
-    pub owner: values::BookOwner,
+    pub(crate) audit: EntityAudit<values::BookId>,
+    pub(crate) title: values::BookTitle,
+    pub(crate) author: values::BookAuthor,
+    pub(crate) isbn: values::BookIsbn,
+    pub(crate) description: values::BookDescription,
+    pub(crate) owner: values::BookOwner,
 }
 
 impl Book {
+    pub fn audit(&self) -> &EntityAudit<values::BookId> {
+        &self.audit
+    }
+    pub fn title(&self) -> &str {
+        self.title.raw()
+    }
+    pub fn author(&self) -> &str {
+        self.author.raw()
+    }
+    pub fn isbn(&self) -> Option<&str> {
+        self.isbn.raw()
+    }
+    pub fn description(&self) -> Option<&str> {
+        self.description.raw()
+    }
+    pub fn owner(&self) -> &UserReference {
+        self.owner.raw()
+    }
+
     pub fn create_new(
         context: &AuditContext,
         title: values::BookTitle,
@@ -25,7 +45,7 @@ impl Book {
         isbn: values::BookIsbn,
         description: values::BookDescription,
     ) -> Result<Self, DomainError> {
-        let permission = AdminPermission::new(context.actor.clone());
+        let permission = PassThroughPermission::new();
         let audit = EntityAudit::create_new(context, &permission)?;
 
         Ok(Book {
@@ -34,7 +54,7 @@ impl Book {
             author,
             isbn,
             description,
-            owner: values::BookOwner::default(),
+            owner: values::BookOwner::new(context.actor.user.clone()),
         })
     }
 
@@ -46,7 +66,7 @@ impl Book {
         isbn: values::BookIsbn,
         description: values::BookDescription,
     ) -> Result<Self, DomainError> {
-        let permission = AdminPermission::new(context.actor.clone());
+        let permission = EntityPermission::new(context.actor.clone(), self.audit.created_by().id());
         let audit = self.audit.mark_updated(context, &permission)?;
 
         Ok(Book {
@@ -64,7 +84,7 @@ impl Book {
         context: &AuditContext,
         owner: values::BookOwner,
     ) -> Result<Self, DomainError> {
-        let permission = PassThroughPermission::new();
+        let permission = AdminPermission::new(context.actor.clone());
         let audit = self.audit.mark_updated(context, &permission)?;
 
         Ok(Book {

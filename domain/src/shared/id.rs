@@ -29,7 +29,7 @@ macro_rules! define_id {
 }
 
 pub mod id_type {
-    pub trait Id {
+    pub trait Id: Sized + Clone + std::fmt::Debug + PartialEq + Eq + Copy {
         fn new() -> Self;
         fn raw(self) -> uuid::Uuid;
     }

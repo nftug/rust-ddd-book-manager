@@ -1,6 +1,6 @@
-pub mod user_email;
-pub mod user_name;
-pub mod user_reference;
+mod user_email;
+mod user_name;
+mod user_reference;
 
 use crate::define_id;
 

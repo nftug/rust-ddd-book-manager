@@ -4,6 +4,15 @@ use crate::user::values::UserId;
 
 #[derive(new, Debug, Clone, PartialEq, Eq)]
 pub struct UserReference {
-    pub user_id: UserId,
-    pub username: String,
+    id: UserId,
+    name: String,
+}
+
+impl UserReference {
+    pub fn id(&self) -> UserId {
+        self.id
+    }
+    pub fn name(&self) -> &str {
+        &self.name
+    }
 }

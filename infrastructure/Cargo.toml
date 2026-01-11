@@ -16,6 +16,7 @@ tracing.workspace = true
 derive-new.workspace = true
 itertools.workspace = true
 serde.workspace = true
+async-trait.workspace = true
 
 sea-orm = { version = "1.1", features = [
     "runtime-tokio-rustls",
@@ -23,8 +24,4 @@ sea-orm = { version = "1.1", features = [
     "uuid",
     "chrono",
     "macros",
-] }
-sea-orm-migration = { version = "1.1", features = [
-    "runtime-tokio-rustls",
-    "sqlx-postgres",
 ] }

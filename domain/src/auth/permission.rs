@@ -1,6 +1,9 @@
 use derive_new::new;
 
-use crate::{auth::Actor, user::UserId};
+use crate::{
+    auth::Actor,
+    user::{UserId, UserRole},
+};
 
 pub trait Permission {
     fn can_create(&self) -> bool;
@@ -13,15 +16,13 @@ pub struct AdminPermission(Actor);
 
 impl Permission for AdminPermission {
     fn can_create(&self) -> bool {
-        self.0.is_admin()
+        self.0.role == UserRole::Admin
     }
-
     fn can_update(&self) -> bool {
-        self.0.is_admin()
+        self.0.role == UserRole::Admin
     }
-
     fn can_delete(&self) -> bool {
-        self.0.is_admin()
+        self.0.role == UserRole::Admin
     }
 }
 
@@ -30,15 +31,13 @@ pub struct SystemPermission(Actor);
 
 impl Permission for SystemPermission {
     fn can_create(&self) -> bool {
-        self.0.is_system()
+        self.0.role == UserRole::System
     }
-
     fn can_update(&self) -> bool {
-        self.0.is_system()
+        self.0.role == UserRole::System
     }
-
     fn can_delete(&self) -> bool {
-        self.0.is_system()
+        self.0.role == UserRole::System
     }
 }
 
@@ -50,15 +49,13 @@ pub struct EntityPermission {
 
 impl Permission for EntityPermission {
     fn can_create(&self) -> bool {
-        self.actor.is_admin() || self.actor.id() == &self.created_by_id
+        self.actor.role != UserRole::Regular || self.actor.id() == self.created_by_id
     }
-
     fn can_update(&self) -> bool {
-        self.actor.is_admin() || self.actor.id() == &self.created_by_id
+        self.actor.role != UserRole::Regular || self.actor.id() == self.created_by_id
     }
-
     fn can_delete(&self) -> bool {
-        self.actor.is_admin() || self.actor.id() == &self.created_by_id
+        self.actor.role != UserRole::Regular || self.actor.id() == self.created_by_id
     }
 }
 
@@ -69,11 +66,9 @@ impl Permission for PassThroughPermission {
     fn can_create(&self) -> bool {
         true
     }
-
     fn can_update(&self) -> bool {
         true
     }
-
     fn can_delete(&self) -> bool {
         true
     }

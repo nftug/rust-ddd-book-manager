@@ -1,8 +1,8 @@
-pub mod book_author;
-pub mod book_description;
-pub mod book_isbn;
-pub mod book_owner;
-pub mod book_title;
+mod book_author;
+mod book_description;
+mod book_isbn;
+mod book_owner;
+mod book_title;
 
 use crate::define_id;
 

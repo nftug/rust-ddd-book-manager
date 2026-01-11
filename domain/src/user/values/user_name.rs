@@ -1,10 +1,12 @@
+use derive_new::new;
+
 use crate::shared::error::DomainError;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, new)]
 pub struct UserName(String);
 
 impl UserName {
-    pub fn new(name: String) -> Result<Self, DomainError> {
+    pub fn try_new(name: String) -> Result<Self, DomainError> {
         match name {
             n if n.is_empty() => Err(DomainError::ValidationError(
                 "User name cannot be empty".to_string(),
@@ -16,10 +18,6 @@ impl UserName {
         }
     }
 
-    pub fn hydrate(name: String) -> Self {
-        UserName(name)
-    }
-
     pub fn raw(&self) -> &str {
         &self.0
     }
@@ -29,6 +27,6 @@ impl TryFrom<String> for UserName {
     type Error = DomainError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        UserName::new(value)
+        UserName::try_new(value)
     }
 }

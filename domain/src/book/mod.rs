@@ -1,4 +1,3 @@
 pub mod entity;
+pub mod interface;
 pub mod values;
-
-pub use entity::Book;

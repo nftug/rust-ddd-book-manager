@@ -1,12 +1,13 @@
+use derive_new::new;
 use email_address::EmailAddress;
 
 use crate::shared::error::DomainError;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, new)]
 pub struct UserEmail(String);
 
 impl UserEmail {
-    pub fn new(email: String) -> Result<Self, DomainError> {
+    pub fn try_new(email: String) -> Result<Self, DomainError> {
         if EmailAddress::is_valid(&email) {
             Ok(UserEmail(email))
         } else {
@@ -16,11 +17,15 @@ impl UserEmail {
         }
     }
 
-    pub fn hydrate(email: String) -> Self {
-        UserEmail(email)
-    }
-
     pub fn raw(&self) -> &str {
         &self.0
+    }
+}
+
+impl TryFrom<String> for UserEmail {
+    type Error = DomainError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        UserEmail::try_new(value)
     }
 }

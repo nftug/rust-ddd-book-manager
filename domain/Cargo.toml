@@ -13,4 +13,6 @@ tracing.workspace = true
 derive-new.workspace = true
 itertools.workspace = true
 serde.workspace = true
+async-trait.workspace = true
+
 email_address = "0.2.9"

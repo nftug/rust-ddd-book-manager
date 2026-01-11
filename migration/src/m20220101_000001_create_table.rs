@@ -1,5 +1,6 @@
-use crate::with_audit_columns;
 use sea_orm_migration::prelude::*;
+
+use crate::macros::with_audit_columns;
 
 #[derive(DeriveMigrationName)]
 pub struct Migration;
@@ -36,15 +37,16 @@ impl MigrationTrait for Migration {
                         .if_not_exists()
                         .col(ColumnDef::new(Books::Title).string_len(255).not_null())
                         .col(ColumnDef::new(Books::Author).string_len(255).not_null())
-                        .col(ColumnDef::new(Books::Isbn).string_len(13).not_null())
+                        .col(ColumnDef::new(Books::Isbn).string_len(13).null())
                         .col(ColumnDef::new(Books::Description).string_len(1000).null())
-                        .col(ColumnDef::new(Books::OwnerId).uuid().null())
+                        .col(ColumnDef::new(Books::OwnerId).uuid().not_null())
                         .foreign_key(
                             ForeignKey::create()
                                 .name("fk_owner_user_id")
                                 .from(Books::Table, Books::OwnerId)
                                 .to(Users::Table, Users::Id)
-                                .on_delete(ForeignKeyAction::SetNull),
+                                .on_delete(ForeignKeyAction::Cascade)
+                                .on_update(ForeignKeyAction::Cascade),
                         )
                 )
                 .to_owned(),

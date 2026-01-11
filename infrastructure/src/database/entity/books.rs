@@ -7,15 +7,15 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     pub title: String,
     pub author: String,
-    pub isbn: String,
+    pub isbn: Option<String>,
     pub description: Option<String>,
-    pub owner_id: Option<Uuid>,
+    pub owner_id: Uuid,
     #[sea_orm(primary_key, auto_increment = false)]
     pub id: Uuid,
-    pub created_at: DateTime,
+    pub created_at: DateTimeWithTimeZone,
     pub created_by_id: Uuid,
     pub created_by_name: String,
-    pub updated_at: Option<DateTime>,
+    pub updated_at: Option<DateTimeWithTimeZone>,
     pub updated_by_id: Option<Uuid>,
     pub updated_by_name: Option<String>,
 }
@@ -26,8 +26,8 @@ pub enum Relation {
         belongs_to = "super::users::Entity",
         from = "Column::OwnerId",
         to = "super::users::Column::Id",
-        on_update = "NoAction",
-        on_delete = "SetNull"
+        on_update = "Cascade",
+        on_delete = "Cascade"
     )]
     Users,
 }
