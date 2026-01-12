@@ -17,11 +17,11 @@ pub struct GetBookDetailsService {
 impl GetBookDetailsService {
     pub async fn execute(
         &self,
-        actor: Actor,
+        actor: Option<&Actor>,
         book_id: Uuid,
     ) -> Result<Option<BookResponseDTO>, ApplicationError> {
         self.book_query_service
-            .get_book_details(&actor, book_id)
+            .get_book_details(actor, book_id)
             .await
             .map_err(|e| e.into())
     }

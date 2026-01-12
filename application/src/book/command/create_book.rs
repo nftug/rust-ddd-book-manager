@@ -20,10 +20,10 @@ pub struct CreateBookService {
 impl CreateBookService {
     pub async fn execute(
         &self,
-        actor: Actor,
+        actor: &Actor,
         request: CreateBookRequestDTO,
     ) -> Result<Uuid, ApplicationError> {
-        let context = AuditContext::new(actor.clone(), self.clock.as_ref());
+        let context = AuditContext::new(actor, self.clock.as_ref());
 
         let book = Book::create_new(
             &context,

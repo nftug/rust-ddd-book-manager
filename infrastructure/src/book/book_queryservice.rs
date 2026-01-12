@@ -28,7 +28,7 @@ pub struct BookQueryServiceImpl {
 impl BookQueryService for BookQueryServiceImpl {
     async fn get_book_details(
         &self,
-        actor: &Actor,
+        actor: Option<&Actor>,
         book_id: uuid::Uuid,
     ) -> Result<Option<BookResponseDTO>, PersistenceError> {
         let result: Option<(books::Model, Option<UserReferenceRow>)> =
@@ -42,8 +42,9 @@ impl BookQueryService for BookQueryServiceImpl {
 
         match result {
             Some((book, Some(owner))) => {
-                let permission = EntityPermission::new(actor.clone(), book.created_by_id.into());
+                let permission = EntityPermission::new(actor, book.created_by_id.into());
                 let audit = hydrate_audit_dto!(book, &permission);
+
                 Ok(Some(BookResponseDTO {
                     id: book.id,
                     title: book.title,
@@ -60,7 +61,7 @@ impl BookQueryService for BookQueryServiceImpl {
 
     async fn get_book_list(
         &self,
-        actor: &Actor,
+        actor: Option<&Actor>,
         query: &BookListQueryDTO,
     ) -> Result<BookListResponseDTO, PersistenceError> {
         let total_count = books::Entity::find()
@@ -85,8 +86,7 @@ impl BookQueryService for BookQueryServiceImpl {
             items: rows
                 .into_iter()
                 .map(|(book, owner)| {
-                    let permission =
-                        EntityPermission::new(actor.clone(), book.created_by_id.into());
+                    let permission = EntityPermission::new(actor, book.created_by_id.into());
                     let audit = hydrate_audit_dto!(book, &permission);
 
                     BookListItemResponseDTO {

@@ -8,13 +8,13 @@ use crate::book::dto::{BookListQueryDTO, BookListResponseDTO, BookResponseDTO};
 pub trait BookQueryService: Send + Sync {
     async fn get_book_details(
         &self,
-        actor: &Actor,
+        actor: Option<&Actor>,
         book_id: Uuid,
     ) -> Result<Option<BookResponseDTO>, PersistenceError>;
 
     async fn get_book_list(
         &self,
-        actor: &Actor,
+        actor: Option<&Actor>,
         query: &BookListQueryDTO,
     ) -> Result<BookListResponseDTO, PersistenceError>;
 }

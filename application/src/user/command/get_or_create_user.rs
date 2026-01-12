@@ -23,8 +23,10 @@ impl GetOrCreateActorService {
         if let Some(user) = self.user_repository.find(request.id.into()).await? {
             Ok(user.into())
         } else {
+            let context = AuditContext::new(&Actor::new_system(), self.clock.as_ref());
+
             let new_user = User::create_new(
-                &AuditContext::new(Actor::new_system(), self.clock.as_ref()),
+                &context,
                 request.id.into(),
                 UserName::try_new(request.name)?,
                 UserEmail::try_new(request.email)?,

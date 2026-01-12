@@ -56,8 +56,8 @@ impl<EId: Id> EntityAudit<EId> {
 
         Ok(EntityAudit {
             id,
-            created_at: context.timestamp,
-            created_by: context.actor.user.clone(),
+            created_at: context.timestamp(),
+            created_by: context.actor_user().clone(),
             updated_at: None,
             updated_by: None,
             is_new: true,
@@ -74,8 +74,8 @@ impl<EId: Id> EntityAudit<EId> {
         }
 
         Ok(EntityAudit {
-            updated_at: Some(context.timestamp),
-            updated_by: Some(context.actor.user.clone()),
+            updated_at: Some(context.timestamp()),
+            updated_by: Some(context.actor_user().clone()),
             ..self
         })
     }

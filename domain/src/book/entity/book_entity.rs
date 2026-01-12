@@ -2,7 +2,10 @@ use derive_new::new;
 
 use crate::{
     audit::{AuditContext, EntityAudit},
-    auth::permission::{AdminPermission, EntityPermission, Permission},
+    auth::{
+        Actor,
+        permission::{AdminPermission, EntityPermission, Permission},
+    },
     book::values,
     shared::error::DomainError,
     user::values::UserReference,
@@ -46,7 +49,7 @@ impl Book {
         description: values::BookDescription,
         owner: values::BookOwner,
     ) -> Result<Self, DomainError> {
-        let permission = EntityPermission::new(context.actor.clone(), owner.id());
+        let permission = EntityPermission::new(Some(context.actor()), owner.id());
         let audit = EntityAudit::create_new(context, &permission)?;
 
         Ok(Book {
@@ -67,7 +70,7 @@ impl Book {
         isbn: values::BookIsbn,
         description: values::BookDescription,
     ) -> Result<Self, DomainError> {
-        let permission = EntityPermission::new(context.actor.clone(), self.audit.created_by().id());
+        let permission = self.permission_to_update(context.actor());
         let audit = self.audit.mark_updated(context, &permission)?;
 
         Ok(Book {
@@ -81,7 +84,7 @@ impl Book {
     }
 
     pub fn validate_deletion(&self, context: &AuditContext) -> Result<(), DomainError> {
-        let permission = EntityPermission::new(context.actor.clone(), self.audit.created_by().id());
+        let permission = self.permission_to_update(context.actor());
         if !permission.can_delete() {
             return Err(DomainError::Forbidden);
         }
@@ -94,7 +97,7 @@ impl Book {
         context: &AuditContext,
         owner: values::BookOwner,
     ) -> Result<Self, DomainError> {
-        let permission = AdminPermission::new(context.actor.clone());
+        let permission = AdminPermission::new(context.actor());
         let audit = self.audit.mark_updated(context, &permission)?;
 
         Ok(Book {
@@ -102,5 +105,9 @@ impl Book {
             owner,
             ..self
         })
+    }
+
+    fn permission_to_update(&self, actor: &Actor) -> EntityPermission {
+        EntityPermission::new(Some(actor), self.audit.created_by().id())
     }
 }

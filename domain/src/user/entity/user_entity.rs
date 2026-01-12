@@ -54,7 +54,7 @@ impl User {
         email: values::UserEmail,
         role: enums::UserRole,
     ) -> Result<Self, DomainError> {
-        let permission = EntityPermission::new(context.actor.clone(), self.audit.id());
+        let permission = EntityPermission::new(Some(context.actor()), self.audit.id());
         let audit = self.audit.mark_updated(context, &permission)?;
 
         Ok(User {

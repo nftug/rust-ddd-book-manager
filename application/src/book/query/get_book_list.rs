@@ -19,11 +19,11 @@ pub struct GetBookListService {
 impl GetBookListService {
     pub async fn execute(
         &self,
-        actor: Actor,
+        actor: Option<&Actor>,
         query: BookListQueryDTO,
     ) -> Result<BookListResponseDTO, ApplicationError> {
         self.book_query_service
-            .get_book_list(&actor, &query)
+            .get_book_list(actor, &query)
             .await
             .map_err(|e| e.into())
     }

@@ -19,12 +19,11 @@ pub struct UpdateBookService {
 impl UpdateBookService {
     pub async fn execute(
         &self,
-        actor: Actor,
+        actor: &Actor,
         book_id: Uuid,
         request: UpdateBookRequestDTO,
     ) -> Result<(), ApplicationError> {
-        let context = AuditContext::new(actor.clone(), self.clock.as_ref());
-
+        let context = AuditContext::new(actor, self.clock.as_ref());
         let book = self
             .book_repository
             .find(book_id.into())

@@ -8,8 +8,14 @@ pub trait Permission {
     fn can_delete(&self) -> bool;
 }
 
-#[derive(Debug, new, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct AdminPermission(Actor);
+
+impl AdminPermission {
+    pub fn new(actor: &Actor) -> Self {
+        AdminPermission(actor.clone())
+    }
+}
 
 impl Permission for AdminPermission {
     fn can_create(&self) -> bool {
@@ -23,8 +29,14 @@ impl Permission for AdminPermission {
     }
 }
 
-#[derive(Debug, new, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct SystemPermission(Actor);
+
+impl SystemPermission {
+    pub fn new(actor: &Actor) -> Self {
+        SystemPermission(actor.clone())
+    }
+}
 
 impl Permission for SystemPermission {
     fn can_create(&self) -> bool {
@@ -38,21 +50,37 @@ impl Permission for SystemPermission {
     }
 }
 
-#[derive(Debug, new, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct EntityPermission {
-    pub actor: Actor,
-    pub created_by_id: UserId,
+    actor: Option<Actor>,
+    owner_user_id: UserId,
+}
+
+impl EntityPermission {
+    pub fn new(actor: Option<&Actor>, owner_user_id: UserId) -> Self {
+        EntityPermission {
+            actor: actor.cloned(),
+            owner_user_id,
+        }
+    }
+
+    fn can_edit(&self) -> bool {
+        match self.actor {
+            Some(ref actor) => actor.role != UserRole::Regular || actor.id() == self.owner_user_id,
+            None => false,
+        }
+    }
 }
 
 impl Permission for EntityPermission {
     fn can_create(&self) -> bool {
-        self.actor.role != UserRole::Regular || self.actor.id() == self.created_by_id
+        self.can_edit()
     }
     fn can_update(&self) -> bool {
-        self.actor.role != UserRole::Regular || self.actor.id() == self.created_by_id
+        self.can_edit()
     }
     fn can_delete(&self) -> bool {
-        self.actor.role != UserRole::Regular || self.actor.id() == self.created_by_id
+        self.can_edit()
     }
 }
 
