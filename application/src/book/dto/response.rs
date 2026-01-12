@@ -1,7 +1,7 @@
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::shared::{AuditDTO, AuditSummaryDTO, PaginationResponseDTO, UserReferenceDTO};
+use crate::shared::{AuditDTO, AuditSummaryDTO, PaginationDTO, UserReferenceDTO};
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -25,4 +25,4 @@ pub struct BookListItemDTO {
     pub audit: AuditSummaryDTO,
 }
 
-pub type BookListResponseDTO = PaginationResponseDTO<BookListItemDTO>;
+pub type BookListResponseDTO = PaginationDTO<BookListItemDTO>;

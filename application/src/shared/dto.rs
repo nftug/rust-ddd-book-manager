@@ -1,4 +1,5 @@
 use chrono::{DateTime, Utc};
+use derive_new::new;
 use domain::auth::permission::Permission;
 use serde::Serialize;
 use uuid::Uuid;
@@ -10,7 +11,7 @@ pub struct AuditDTO {
     pub created_at: DateTime<Utc>,
     pub updated_by: Option<UserReferenceDTO>,
     pub updated_at: Option<DateTime<Utc>>,
-    pub permission: PermissionResponseDTO,
+    pub permission: PermissionDTO,
 }
 
 #[derive(Debug, Serialize)]
@@ -18,7 +19,7 @@ pub struct AuditDTO {
 pub struct AuditSummaryDTO {
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
-    pub permission: PermissionResponseDTO,
+    pub permission: PermissionDTO,
 }
 
 #[derive(Debug, Serialize)]
@@ -30,14 +31,14 @@ pub struct UserReferenceDTO {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct PermissionResponseDTO {
+pub struct PermissionDTO {
     pub can_update: bool,
     pub can_delete: bool,
 }
 
-impl From<&dyn Permission> for PermissionResponseDTO {
+impl From<&dyn Permission> for PermissionDTO {
     fn from(permission: &dyn Permission) -> Self {
-        PermissionResponseDTO {
+        PermissionDTO {
             can_update: permission.can_update(),
             can_delete: permission.can_delete(),
         }
@@ -46,9 +47,15 @@ impl From<&dyn Permission> for PermissionResponseDTO {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct PaginationResponseDTO<T> {
+pub struct PaginationDTO<T> {
     pub limit: u64,
     pub page: u64,
     pub total_count: u64,
     pub items: Vec<T>,
+}
+
+#[derive(Debug, Serialize, new)]
+#[serde(rename_all = "camelCase")]
+pub struct EntityCreationDTO {
+    pub id: Uuid,
 }

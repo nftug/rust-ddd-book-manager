@@ -7,9 +7,11 @@ use domain::{
     book::{entity::Book, interface::BookRepository, values::*},
     shared::Id,
 };
-use uuid::Uuid;
 
-use crate::{book::dto::CreateBookRequestDTO, shared::error::ApplicationError};
+use crate::{
+    book::dto::CreateBookRequestDTO,
+    shared::{EntityCreationDTO, error::ApplicationError},
+};
 
 #[derive(new)]
 pub struct CreateBookService {
@@ -22,7 +24,7 @@ impl CreateBookService {
         &self,
         actor: &Actor,
         request: CreateBookRequestDTO,
-    ) -> Result<Uuid, ApplicationError> {
+    ) -> Result<EntityCreationDTO, ApplicationError> {
         let context = AuditContext::new(actor, self.clock.as_ref());
 
         let book = Book::create_new(
@@ -36,6 +38,6 @@ impl CreateBookService {
 
         self.book_repository.save(&book).await?;
 
-        Ok(book.audit().id().raw())
+        Ok(EntityCreationDTO::new(book.audit().id().raw()))
     }
 }

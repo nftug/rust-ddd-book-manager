@@ -42,13 +42,13 @@ pub async fn get_book_list_handler(
 pub async fn create_book_handler(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
-    Json(payload): Json<CreateBookRequestDTO>,
+    Json(request): Json<CreateBookRequestDTO>,
 ) -> Result<impl IntoResponse, ApiError> {
     let actor = registry.prepare_actor(user_info).await?;
 
     let response = registry
         .book_registry()
-        .create_book(&actor, payload)
+        .create_book(&actor, request)
         .await?;
 
     Ok((StatusCode::CREATED, Json(response)))
@@ -58,13 +58,13 @@ pub async fn update_book_handler(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
     Path(book_id): Path<Uuid>,
-    Json(payload): Json<UpdateBookRequestDTO>,
+    Json(request): Json<UpdateBookRequestDTO>,
 ) -> Result<impl IntoResponse, ApiError> {
     let actor = registry.prepare_actor(user_info).await?;
 
     registry
         .book_registry()
-        .update_book(&actor, book_id, payload)
+        .update_book(&actor, book_id, request)
         .await?;
 
     Ok(StatusCode::NO_CONTENT)

@@ -5,7 +5,7 @@ use uuid::Uuid;
 
 use crate::{
     book::{command::*, dto::*, interface::BookQueryService, query::*},
-    shared::error::ApplicationError,
+    shared::{EntityCreationDTO, error::ApplicationError},
 };
 
 pub struct BookRegistry {
@@ -41,7 +41,7 @@ impl BookRegistry {
         &self,
         actor: &Actor,
         request: CreateBookRequestDTO,
-    ) -> Result<Uuid, ApplicationError> {
+    ) -> Result<EntityCreationDTO, ApplicationError> {
         self.create_book.execute(actor, request).await
     }
 
