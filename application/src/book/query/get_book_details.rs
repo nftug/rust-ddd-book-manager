@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use derive_new::new;
-use domain::audit::AuditContext;
+use domain::auth::Actor;
 use uuid::Uuid;
 
 use crate::{
@@ -17,11 +17,11 @@ pub struct GetBookDetailsService {
 impl GetBookDetailsService {
     pub async fn execute(
         &self,
-        context: &AuditContext,
+        actor: Actor,
         book_id: Uuid,
     ) -> Result<Option<BookResponseDTO>, ApplicationError> {
         self.book_query_service
-            .get_book_details(&context.actor, book_id)
+            .get_book_details(&actor, book_id)
             .await
             .map_err(|e| e.into())
     }

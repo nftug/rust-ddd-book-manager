@@ -19,7 +19,7 @@ pub struct UpdateBookService {
 impl UpdateBookService {
     pub async fn execute(
         &self,
-        actor: &Actor,
+        actor: Actor,
         book_id: Uuid,
         request: UpdateBookRequestDTO,
     ) -> Result<(), ApplicationError> {

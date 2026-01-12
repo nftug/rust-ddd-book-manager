@@ -17,3 +17,8 @@ tracing.workspace = true
 derive-new.workspace = true
 itertools.workspace = true
 serde.workspace = true
+axum = { version = "0.8.8", features = ["macros"] }
+tokio = { version = "1.49.0", features = ["full"] }
+tower-http = { version = "0.6.8", features = ["cors", "trace"] }
+axum-extra = { version = "0.12.5", features = ["typed-header"] }
+utoipa = { version = "5.4.0", features = ["axum_extras", "uuid", "chrono"] }

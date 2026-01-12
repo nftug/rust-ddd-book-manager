@@ -4,24 +4,21 @@ pub struct AppConfig {
 }
 
 impl AppConfig {
-    pub fn from_env() -> Self {
+    pub fn from_env() -> Result<Self, Box<dyn std::error::Error>> {
         let database = DatabaseConfig {
-            host: std::env::var("DATABASE_HOST").expect("DATABASE_HOST must be set"),
-            port: std::env::var("DATABASE_PORT")
-                .expect("DATABASE_PORT must be set")
-                .parse()
-                .expect("DATABASE_PORT must be a valid u16"),
-            username: std::env::var("DATABASE_USERNAME").expect("DATABASE_USERNAME must be set"),
-            password: std::env::var("DATABASE_PASSWORD").expect("DATABASE_PASSWORD must be set"),
-            database: std::env::var("DATABASE_NAME").expect("DATABASE_NAME must be set"),
+            host: std::env::var("DATABASE_HOST")?,
+            port: std::env::var("DATABASE_PORT")?.parse()?,
+            username: std::env::var("DATABASE_USERNAME")?,
+            password: std::env::var("DATABASE_PASSWORD")?,
+            database: std::env::var("DATABASE_NAME")?,
         };
 
         let oidc = OidcConfig {
-            authority: std::env::var("OIDC_AUTHORITY").expect("OIDC_AUTHORITY must be set"),
-            client_id: std::env::var("OIDC_CLIENT_ID").expect("OIDC_CLIENT_ID must be set"),
+            authority: std::env::var("OIDC_AUTHORITY")?,
+            client_id: std::env::var("OIDC_CLIENT_ID")?,
         };
 
-        AppConfig { database, oidc }
+        Ok(AppConfig { database, oidc })
     }
 }
 

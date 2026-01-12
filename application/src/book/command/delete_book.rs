@@ -17,7 +17,7 @@ pub struct DeleteBookService {
 }
 
 impl DeleteBookService {
-    pub async fn execute(&self, actor: &Actor, book_id: Uuid) -> Result<(), ApplicationError> {
+    pub async fn execute(&self, actor: Actor, book_id: Uuid) -> Result<(), ApplicationError> {
         let context = AuditContext::new(actor.clone(), self.clock.as_ref());
 
         let book = self

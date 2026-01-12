@@ -68,14 +68,12 @@ impl BookQueryService for BookQueryServiceImpl {
             .await
             .map_err(|_| PersistenceError::OperationError)?;
 
-        let paginator = books::Entity::find()
+        let rows = books::Entity::find()
             .inner_join(users::Entity)
             .select_also(users::Entity)
             .order_by_asc(books::Column::CreatedAt)
             .into_model::<BookListItemRow, UserReferenceRow>()
-            .paginate(self.db.inner_ref(), query.limit as u64);
-
-        let rows = paginator
+            .paginate(self.db.inner_ref(), query.limit as u64)
             .fetch_page(query.page_from_zero())
             .await
             .map_err(|_| PersistenceError::OperationError)?;

@@ -20,7 +20,7 @@ pub struct CreateBookService {
 impl CreateBookService {
     pub async fn execute(
         &self,
-        actor: &Actor,
+        actor: Actor,
         request: CreateBookRequestDTO,
     ) -> Result<Uuid, ApplicationError> {
         let context = AuditContext::new(actor.clone(), self.clock.as_ref());
@@ -31,7 +31,7 @@ impl CreateBookService {
             BookAuthor::try_new(request.author)?,
             BookIsbn::try_new(request.isbn)?,
             BookDescription::try_new(request.description)?,
-            BookOwner::new(context.actor.clone().into()),
+            BookOwner::new(actor.clone().into()),
         )?;
 
         self.book_repository.save(&book).await?;

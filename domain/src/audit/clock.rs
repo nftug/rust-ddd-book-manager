@@ -1,6 +1,6 @@
 use chrono::{DateTime, Utc};
 
-pub trait Clock {
+pub trait Clock: Send + Sync {
     fn now(&self) -> DateTime<Utc> {
         Utc::now()
     }

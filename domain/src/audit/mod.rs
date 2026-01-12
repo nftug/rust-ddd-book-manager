@@ -1,5 +1,5 @@
 mod audit_context;
-mod clock;
+pub mod clock;
 mod entity_audit;
 
 pub use audit_context::AuditContext;
