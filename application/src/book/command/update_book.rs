@@ -4,7 +4,7 @@ use derive_new::new;
 use domain::{
     audit::{AuditContext, Clock},
     auth::Actor,
-    book::{interface::BookRepository, values::*},
+    book::interface::BookRepository,
 };
 use uuid::Uuid;
 
@@ -32,10 +32,10 @@ impl UpdateBookService {
 
         let updated_book = book.update(
             &context,
-            BookTitle::try_new(request.title)?,
-            BookAuthor::try_new(request.author)?,
-            BookIsbn::try_new(request.isbn)?,
-            BookDescription::try_new(request.description)?,
+            request.title.try_into()?,
+            request.author.try_into()?,
+            request.isbn.try_into()?,
+            request.description.try_into()?,
         )?;
 
         self.book_repository.save(&updated_book).await?;

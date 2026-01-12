@@ -1,6 +1,7 @@
 use derive_new::new;
 
 use crate::{
+    auth::Actor,
     shared::error::DomainError,
     user::values::{UserId, UserReference},
 };
@@ -20,7 +21,7 @@ impl BookOwner {
     }
 
     pub fn hydrate(owner: UserReference) -> Self {
-        BookOwner(owner)
+        Self(owner)
     }
 
     pub fn update(&self, new_owner: UserReference) -> Result<Self, DomainError> {
@@ -29,7 +30,13 @@ impl BookOwner {
                 "Book owner is the same as the current one".to_string(),
             ))
         } else {
-            Ok(BookOwner::hydrate(new_owner))
+            Ok(Self(new_owner))
         }
+    }
+}
+
+impl From<&Actor> for BookOwner {
+    fn from(actor: &Actor) -> Self {
+        Self(actor.clone().into())
     }
 }

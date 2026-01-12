@@ -6,18 +6,8 @@ use crate::shared::error::DomainError;
 pub struct UserEmail(String);
 
 impl UserEmail {
-    pub fn try_new(email: String) -> Result<Self, DomainError> {
-        if EmailAddress::is_valid(&email) {
-            Ok(UserEmail(email))
-        } else {
-            Err(DomainError::ValidationError(
-                "Invalid email address format".to_string(),
-            ))
-        }
-    }
-
     pub fn hydrate(email: String) -> Self {
-        UserEmail(email)
+        Self(email)
     }
 
     pub fn raw(&self) -> &str {
@@ -29,6 +19,12 @@ impl TryFrom<String> for UserEmail {
     type Error = DomainError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
-        UserEmail::try_new(value)
+        if EmailAddress::is_valid(&value) {
+            Ok(Self(value))
+        } else {
+            Err(DomainError::ValidationError(
+                "Invalid email address format".to_string(),
+            ))
+        }
     }
 }

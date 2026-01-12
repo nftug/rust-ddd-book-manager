@@ -8,7 +8,6 @@ use domain::{
     user::{
         entity::User,
         interface::{UserDomainQueryService, UserRepository},
-        values::*,
     },
 };
 
@@ -38,8 +37,8 @@ impl GetOrCreateActorService {
             let new_user = User::create_new(
                 &context,
                 request.id.into(),
-                UserName::try_new(request.name)?,
-                UserEmail::try_new(request.email)?,
+                request.name.try_into()?,
+                request.email.try_into()?,
                 request.role,
             )?;
 

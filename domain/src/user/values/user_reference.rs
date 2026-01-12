@@ -10,7 +10,7 @@ pub struct UserReference {
 
 impl UserReference {
     pub fn hydrate(id: Uuid, name: String) -> Self {
-        UserReference {
+        Self {
             id: id.into(),
             name: UserName::hydrate(name),
         }

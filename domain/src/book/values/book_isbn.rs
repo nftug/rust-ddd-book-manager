@@ -4,17 +4,8 @@ use crate::shared::error::DomainError;
 pub struct BookIsbn(Option<String>);
 
 impl BookIsbn {
-    pub fn try_new(isbn: Option<String>) -> Result<Self, DomainError> {
-        match isbn {
-            Some(ref i) if i.len() != 13 => Err(DomainError::ValidationError(
-                "Book ISBN must be 13 characters long".to_string(),
-            )),
-            _ => Ok(BookIsbn(isbn)),
-        }
-    }
-
     pub fn hydrate(isbn: Option<String>) -> Self {
-        BookIsbn(isbn)
+        Self(isbn)
     }
 
     pub fn raw(&self) -> Option<&str> {
@@ -26,6 +17,11 @@ impl TryFrom<Option<String>> for BookIsbn {
     type Error = DomainError;
 
     fn try_from(value: Option<String>) -> Result<Self, Self::Error> {
-        BookIsbn::try_new(value)
+        match value {
+            Some(ref i) if i.len() != 13 => Err(DomainError::ValidationError(
+                "Book ISBN must be 13 characters long".to_string(),
+            )),
+            _ => Ok(Self(value)),
+        }
     }
 }
