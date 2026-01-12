@@ -40,21 +40,20 @@ pub async fn me_handler(
 ) -> Result<impl IntoResponse, OidcAuthError> {
     let full_name = user_info
         .full_name
-        .clone()
         .ok_or(OidcAuthError::InvalidToken("missing full name".to_string()))?;
 
     let email = user_info
         .email
-        .clone()
         .ok_or(OidcAuthError::InvalidToken("missing email".to_string()))?;
 
     let role = map_roles_to_user_role(&user_info.roles);
 
-    let dto = GetOrCreateUserRequestDTO::new(user_info.id, full_name, email.clone(), role.clone());
+    let request =
+        GetOrCreateUserRequestDTO::new(user_info.id, full_name, email.clone(), role.clone());
 
     let actor = registry
-        .get_or_create_user()
-        .execute(dto)
+        .user_registry()
+        .get_or_create_user(request)
         .await
         .map_err(|_| OidcAuthError::InvalidToken("failed to get or create user".to_string()))?;
 
