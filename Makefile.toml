@@ -2,7 +2,6 @@
 default_to_workspace = false
 
 [env]
-HOST = "0.0.0.0"
 PORT = 8080
 DATABASE_PORT_INNER = 5432
 DATABASE_PORT_OUTER = 5432
@@ -56,7 +55,7 @@ args = [
 extend = "set-env-local"
 dependencies = ["before-build"]
 command = "cargo"
-args = ["run"]
+args = ["run", "-p", "api"]
 
 [tasks.check]
 extend = "set-env-local"
