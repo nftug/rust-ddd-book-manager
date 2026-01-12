@@ -4,7 +4,12 @@ use derive_new::new;
 use domain::{
     audit::{AuditContext, Clock},
     auth::Actor,
-    user::{entity::User, interface::UserRepository, values::*},
+    shared::Id,
+    user::{
+        entity::User,
+        interface::{UserDomainQueryService, UserRepository},
+        values::*,
+    },
 };
 
 use crate::{shared::error::ApplicationError, user::dto::GetOrCreateUserRequestDTO};
@@ -12,6 +17,7 @@ use crate::{shared::error::ApplicationError, user::dto::GetOrCreateUserRequestDT
 #[derive(new)]
 pub struct GetOrCreateActorService {
     clock: Arc<dyn Clock>,
+    user_domain_query_service: Arc<dyn UserDomainQueryService>,
     user_repository: Arc<dyn UserRepository>,
 }
 
@@ -20,8 +26,12 @@ impl GetOrCreateActorService {
         &self,
         request: GetOrCreateUserRequestDTO,
     ) -> Result<Actor, ApplicationError> {
-        if let Some(user) = self.user_repository.find(request.id.into()).await? {
-            Ok(user.into())
+        if let Some(actor) = self
+            .user_domain_query_service
+            .find_actor_by_id(request.id.into())
+            .await?
+        {
+            Ok(actor)
         } else {
             let context = AuditContext::new(&Actor::new_system(), self.clock.as_ref());
 
@@ -35,7 +45,11 @@ impl GetOrCreateActorService {
 
             self.user_repository.save(&new_user).await?;
 
-            Ok(new_user.into())
+            Ok(Actor::hydrate(
+                new_user.audit().id().raw(),
+                new_user.name().into(),
+                new_user.role().clone(),
+            ))
         }
     }
 }

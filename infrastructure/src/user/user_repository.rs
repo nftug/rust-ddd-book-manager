@@ -29,10 +29,10 @@ impl UserRepository for UserRepositoryImpl {
         match result {
             Some(user) => {
                 let audit = hydrate_audit!(user, UserId);
-                Ok(Some(User::new(
+                Ok(Some(User::hydrate(
                     audit,
-                    UserName::new(user.name),
-                    UserEmail::new(user.email),
+                    user.name,
+                    user.email,
                     UserRole::from_str(&user.role)
                         .map_err(|e| PersistenceError::EntityConversionError(e.to_string()))?,
                 )))

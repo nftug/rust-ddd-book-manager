@@ -1,8 +1,6 @@
-use derive_new::new;
-
 use crate::shared::error::DomainError;
 
-#[derive(Debug, Clone, PartialEq, Eq, new)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BookDescription(Option<String>);
 
 impl BookDescription {
@@ -14,6 +12,11 @@ impl BookDescription {
             _ => Ok(BookDescription(description)),
         }
     }
+
+    pub fn hydrate(description: Option<String>) -> Self {
+        BookDescription(description)
+    }
+
     pub fn raw(&self) -> Option<&str> {
         self.0.as_deref()
     }

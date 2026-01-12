@@ -1,6 +1,6 @@
 mod auth_error;
 mod claims;
-pub mod extractor;
+mod extractor;
 mod jwks;
 mod jwt;
 

@@ -1,12 +1,11 @@
-use derive_new::new;
+use uuid::Uuid;
 
 use crate::user::{
-    entity::User,
     enums::UserRole,
-    values::{UserId, UserName, UserReference},
+    values::{UserId, UserReference},
 };
 
-#[derive(new, Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Actor {
     pub(crate) user: UserReference,
     pub(crate) role: UserRole,
@@ -20,9 +19,16 @@ impl Actor {
         self.user.name()
     }
 
+    pub fn hydrate(id: Uuid, name: String, role: UserRole) -> Self {
+        Actor {
+            user: UserReference::hydrate(id, name),
+            role,
+        }
+    }
+
     pub fn new_system() -> Self {
         Actor {
-            user: UserReference::new(UserId::default(), UserName::new("System".to_string())),
+            user: UserReference::hydrate(Uuid::default(), "System".to_string()),
             role: UserRole::System,
         }
     }
@@ -31,14 +37,5 @@ impl Actor {
 impl From<Actor> for UserReference {
     fn from(actor: Actor) -> Self {
         actor.user
-    }
-}
-
-impl From<User> for Actor {
-    fn from(user: User) -> Self {
-        Actor {
-            user: UserReference::new(user.audit().id(), UserName::new(user.name().to_string())),
-            role: user.role().clone(),
-        }
     }
 }

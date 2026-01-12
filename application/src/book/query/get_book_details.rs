@@ -5,7 +5,7 @@ use domain::auth::Actor;
 use uuid::Uuid;
 
 use crate::{
-    book::{dto::BookResponseDTO, interface::BookQueryService},
+    book::{dto::BookDetailsDTO, interface::BookQueryService},
     shared::error::ApplicationError,
 };
 
@@ -19,10 +19,11 @@ impl GetBookDetailsService {
         &self,
         actor: Option<&Actor>,
         book_id: Uuid,
-    ) -> Result<Option<BookResponseDTO>, ApplicationError> {
+    ) -> Result<BookDetailsDTO, ApplicationError> {
         self.book_query_service
             .get_book_details(actor, book_id)
             .await
             .map_err(|e| e.into())
+            .and_then(|opt| opt.ok_or(ApplicationError::NotFound))
     }
 }

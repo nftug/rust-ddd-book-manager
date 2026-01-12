@@ -6,7 +6,7 @@ use infrastructure::{
     book::{BookQueryServiceImpl, BookRepositoryImpl},
     config::AppConfig,
     database::ConnectionPool,
-    user::UserRepositoryImpl,
+    user::{UserDomainQueryServiceImpl, UserQueryServiceImpl, UserRepositoryImpl},
 };
 
 #[derive(Clone)]
@@ -23,11 +23,19 @@ impl AppRegistry {
         let clock = Arc::new(SystemClock {});
 
         let book_repository = Arc::new(BookRepositoryImpl::new(db.clone()));
-        let book_queryservice = Arc::new(BookQueryServiceImpl::new(db.clone()));
-        let user_repository = Arc::new(UserRepositoryImpl::new(db.clone()));
+        let book_query_service = Arc::new(BookQueryServiceImpl::new(db.clone()));
 
-        let book_registry = BookRegistry::new(book_repository, book_queryservice, clock.clone());
-        let user_registry = UserRegistry::new(user_repository, clock.clone());
+        let user_repository = Arc::new(UserRepositoryImpl::new(db.clone()));
+        let user_query_service = Arc::new(UserQueryServiceImpl::new(db.clone()));
+        let user_domain_query_service = Arc::new(UserDomainQueryServiceImpl::new(db.clone()));
+
+        let book_registry = BookRegistry::new(book_repository, book_query_service, clock.clone());
+        let user_registry = UserRegistry::new(
+            user_repository,
+            user_query_service,
+            user_domain_query_service,
+            clock.clone(),
+        );
 
         Ok(AppRegistry {
             config: Arc::new(config),

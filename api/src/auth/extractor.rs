@@ -7,22 +7,25 @@ use axum_extra::{
 
 use crate::{
     auth::{OidcAuthError, claims::OidcUserInfo, jwt::decode_and_validate_token},
+    error::ApiError,
     registry::AppRegistry,
 };
 
 impl FromRequestParts<AppRegistry> for OidcUserInfo {
-    type Rejection = OidcAuthError;
+    type Rejection = ApiError;
 
     async fn from_request_parts(
         parts: &mut Parts,
         state: &AppRegistry,
     ) -> Result<Self, Self::Rejection> {
-        oidc_from_request_parts(parts, state).await
+        oidc_from_request_parts(parts, state)
+            .await
+            .map_err(|e| e.into())
     }
 }
 
 impl FromRequestParts<AppRegistry> for Option<OidcUserInfo> {
-    type Rejection = OidcAuthError;
+    type Rejection = ApiError;
 
     async fn from_request_parts(
         parts: &mut Parts,
@@ -31,7 +34,7 @@ impl FromRequestParts<AppRegistry> for Option<OidcUserInfo> {
         match oidc_from_request_parts(parts, state).await {
             Ok(oidc_user) => Ok(Some(oidc_user)),
             Err(OidcAuthError::MissingToken) => Ok(None),
-            Err(e) => Err(e),
+            Err(e) => Err(e.into()),
         }
     }
 }
@@ -48,5 +51,5 @@ async fn oidc_from_request_parts(
     let oidc_config = &state.config().oidc;
     let claims = decode_and_validate_token(bearer.token(), oidc_config).await?;
 
-    OidcUserInfo::from_claims(claims)
+    Ok(claims.into())
 }

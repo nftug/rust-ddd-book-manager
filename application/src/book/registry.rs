@@ -62,7 +62,7 @@ impl BookRegistry {
         &self,
         actor: Option<&Actor>,
         book_id: Uuid,
-    ) -> Result<Option<BookResponseDTO>, ApplicationError> {
+    ) -> Result<BookDetailsDTO, ApplicationError> {
         self.get_book_details.execute(actor, book_id).await
     }
 

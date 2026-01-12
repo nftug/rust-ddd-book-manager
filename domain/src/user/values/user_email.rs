@@ -1,9 +1,8 @@
-use derive_new::new;
 use email_address::EmailAddress;
 
 use crate::shared::error::DomainError;
 
-#[derive(Debug, Clone, PartialEq, Eq, new)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserEmail(String);
 
 impl UserEmail {
@@ -15,6 +14,10 @@ impl UserEmail {
                 "Invalid email address format".to_string(),
             ))
         }
+    }
+
+    pub fn hydrate(email: String) -> Self {
+        UserEmail(email)
     }
 
     pub fn raw(&self) -> &str {

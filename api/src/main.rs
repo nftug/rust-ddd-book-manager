@@ -1,35 +1,27 @@
 use std::net::{Ipv4Addr, SocketAddr};
 
-use axum::Router;
-use tower_http::{
-    LatencyUnit,
-    trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
+use api::{
+    logging::{build_trace_layer, init_logger},
+    registry::AppRegistry,
+    router::build_router,
 };
-use tracing::Level;
-
-use api::{registry::AppRegistry, user::me_router};
+use tracing::info;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let registry = AppRegistry::new().await?;
     let config = registry.config();
 
-    let app = Router::new()
-        .merge(me_router())
-        .layer(
-            TraceLayer::new_for_http()
-                .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
-                .on_request(DefaultOnRequest::new().level(Level::INFO))
-                .on_response(
-                    DefaultOnResponse::new()
-                        .level(Level::INFO)
-                        .latency_unit(LatencyUnit::Millis),
-                ),
-        )
+    init_logger(&config)?;
+
+    let app = build_router()
+        .layer(build_trace_layer())
         .with_state(registry);
 
     let addr = SocketAddr::from((Ipv4Addr::LOCALHOST, config.server.port));
-    println!("listening on {}", addr);
+
+    info!("Starting server at http://{}", addr);
+    info!("Environment: {:?}", config.environment);
 
     axum::serve(tokio::net::TcpListener::bind(addr).await?, app).await?;
 

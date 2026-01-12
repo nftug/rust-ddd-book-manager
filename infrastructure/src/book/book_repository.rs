@@ -4,13 +4,13 @@ use domain::{
     book::{entity::Book, interface::BookRepository, values::*},
     shared::{Id, error::PersistenceError},
 };
-use sea_orm::{ActiveValue::Set, EntityTrait};
+use sea_orm::{ActiveValue::Set, EntityTrait, QuerySelect};
 
 use crate::{
     database::{
         ConnectionPool,
         entity::{books, users},
-        row::user_row::UserReferenceRow,
+        row::user_rows::UserReferenceRow,
     },
     macros::{audit_defaults, audit_defaults_update, hydrate_audit},
 };
@@ -27,6 +27,7 @@ impl BookRepository for BookRepositoryImpl {
             books::Entity::find_by_id(id.raw())
                 .inner_join(users::Entity)
                 .select_also(users::Entity)
+                .columns([users::Column::Id, users::Column::Name])
                 .into_model()
                 .one(self.db.inner_ref())
                 .await
@@ -35,13 +36,13 @@ impl BookRepository for BookRepositoryImpl {
         match result {
             Some((book, Some(owner))) => {
                 let audit = hydrate_audit!(book, BookId);
-                Ok(Some(Book::new(
+                Ok(Some(Book::hydrate(
                     audit,
-                    BookTitle::new(book.title),
-                    BookAuthor::new(book.author),
-                    BookIsbn::new(book.isbn),
-                    BookDescription::new(book.description),
-                    BookOwner::new(owner.into()),
+                    book.title,
+                    book.author,
+                    book.isbn,
+                    book.description,
+                    owner.into(),
                 )))
             }
             _ => Ok(None),

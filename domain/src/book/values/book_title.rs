@@ -18,6 +18,10 @@ impl BookTitle {
         }
     }
 
+    pub fn hydrate(title: String) -> Self {
+        BookTitle(title)
+    }
+
     pub fn raw(&self) -> &str {
         &self.0
     }

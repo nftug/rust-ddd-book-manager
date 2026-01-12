@@ -1,22 +1,20 @@
-use derive_new::new;
-
 use crate::{
     audit::{AuditContext, EntityAudit},
     auth::permission::{EntityPermission, PassThroughPermission},
     shared::error::DomainError,
-    user::{enums, values},
+    user::{enums, values::*},
 };
 
-#[derive(Debug, new, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct User {
-    pub(crate) audit: EntityAudit<values::UserId>,
-    pub(crate) name: values::UserName,
-    pub(crate) email: values::UserEmail,
-    pub(crate) role: enums::UserRole,
+    audit: EntityAudit<UserId>,
+    name: UserName,
+    email: UserEmail,
+    role: enums::UserRole,
 }
 
 impl User {
-    pub fn audit(&self) -> &EntityAudit<values::UserId> {
+    pub fn audit(&self) -> &EntityAudit<UserId> {
         &self.audit
     }
     pub fn name(&self) -> &str {
@@ -29,11 +27,25 @@ impl User {
         &self.role
     }
 
+    pub fn hydrate(
+        audit: EntityAudit<UserId>,
+        name: String,
+        email: String,
+        role: enums::UserRole,
+    ) -> Self {
+        User {
+            audit,
+            name: UserName::hydrate(name),
+            email: UserEmail::hydrate(email),
+            role,
+        }
+    }
+
     pub fn create_new(
         context: &AuditContext,
-        user_id: values::UserId,
-        name: values::UserName,
-        email: values::UserEmail,
+        user_id: UserId,
+        name: UserName,
+        email: UserEmail,
         role: enums::UserRole,
     ) -> Result<Self, DomainError> {
         let permission = PassThroughPermission::new();
@@ -50,8 +62,8 @@ impl User {
     pub fn update(
         self,
         context: &AuditContext,
-        name: values::UserName,
-        email: values::UserEmail,
+        name: UserName,
+        email: UserEmail,
         role: enums::UserRole,
     ) -> Result<Self, DomainError> {
         let permission = EntityPermission::new(Some(context.actor()), self.audit.id());

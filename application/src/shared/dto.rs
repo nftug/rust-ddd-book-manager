@@ -5,10 +5,18 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AuditResponseDTO {
+pub struct AuditDTO {
     pub created_by: UserReferenceDTO,
     pub created_at: DateTime<Utc>,
     pub updated_by: Option<UserReferenceDTO>,
+    pub updated_at: Option<DateTime<Utc>>,
+    pub permission: PermissionResponseDTO,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AuditSummaryDTO {
+    pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
     pub permission: PermissionResponseDTO,
 }

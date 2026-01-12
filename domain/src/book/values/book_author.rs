@@ -1,8 +1,6 @@
-use derive_new::new;
-
 use crate::shared::error::DomainError;
 
-#[derive(Debug, Clone, PartialEq, Eq, new)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BookAuthor(String);
 
 impl BookAuthor {
@@ -16,6 +14,10 @@ impl BookAuthor {
             )),
             a => Ok(BookAuthor(a)),
         }
+    }
+
+    pub fn hydrate(author: String) -> Self {
+        BookAuthor(author)
     }
 
     pub fn raw(&self) -> &str {

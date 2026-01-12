@@ -1,11 +1,10 @@
-use derive_new::new;
 use domain::user::enums::UserRole;
-use serde::Deserialize;
+use serde::Serialize;
 use uuid::Uuid;
 
-#[derive(new, Deserialize)]
+#[derive(Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct GetOrCreateUserRequestDTO {
+pub struct UserDetailsDTO {
     pub id: Uuid,
     pub name: String,
     pub email: String,

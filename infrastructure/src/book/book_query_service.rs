@@ -5,16 +5,14 @@ use domain::{
     auth::{Actor, permission::EntityPermission},
     shared::error::PersistenceError,
 };
-use sea_orm::{
-    EntityTrait, FromQueryResult, PaginatorTrait, QueryOrder, prelude::DateTimeWithTimeZone,
-};
+use sea_orm::{EntityTrait, PaginatorTrait, QueryOrder, QuerySelect};
 use uuid::Uuid;
 
 use crate::{
     database::{
         ConnectionPool,
         entity::{books, users},
-        row::user_row::UserReferenceRow,
+        row::{book_rows::BookListItemRow, user_rows::UserReferenceRow},
     },
     macros::hydrate_audit_dto,
 };
@@ -29,12 +27,13 @@ impl BookQueryService for BookQueryServiceImpl {
     async fn get_book_details(
         &self,
         actor: Option<&Actor>,
-        book_id: uuid::Uuid,
-    ) -> Result<Option<BookResponseDTO>, PersistenceError> {
+        book_id: Uuid,
+    ) -> Result<Option<BookDetailsDTO>, PersistenceError> {
         let result: Option<(books::Model, Option<UserReferenceRow>)> =
             books::Entity::find_by_id(book_id)
                 .inner_join(users::Entity)
                 .select_also(users::Entity)
+                .columns([users::Column::Id, users::Column::Name])
                 .into_model()
                 .one(self.db.inner_ref())
                 .await
@@ -45,7 +44,7 @@ impl BookQueryService for BookQueryServiceImpl {
                 let permission = EntityPermission::new(actor, book.created_by_id.into());
                 let audit = hydrate_audit_dto!(book, &permission);
 
-                Ok(Some(BookResponseDTO {
+                Ok(Some(BookDetailsDTO {
                     id: book.id,
                     title: book.title,
                     author: book.author,
@@ -70,14 +69,29 @@ impl BookQueryService for BookQueryServiceImpl {
             .map_err(|_| PersistenceError::OperationError)?;
 
         let rows = books::Entity::find()
+            .columns([
+                books::Column::Id,
+                books::Column::Title,
+                books::Column::Author,
+                books::Column::Description,
+                books::Column::OwnerId,
+                books::Column::CreatedAt,
+                books::Column::UpdatedAt,
+            ])
             .inner_join(users::Entity)
             .select_also(users::Entity)
+            .columns([users::Column::Id, users::Column::Name])
             .order_by_asc(books::Column::CreatedAt)
             .into_model::<BookListItemRow, UserReferenceRow>()
             .paginate(self.db.inner_ref(), query.limit as u64)
             .fetch_page(query.page_from_zero())
             .await
             .map_err(|_| PersistenceError::OperationError)?;
+
+        let rows: Vec<_> = rows
+            .into_iter()
+            .filter_map(|(book, owner)| owner.map(|o| (book, o)))
+            .collect();
 
         Ok(BookListResponseDTO {
             limit: query.limit,
@@ -86,31 +100,10 @@ impl BookQueryService for BookQueryServiceImpl {
             items: rows
                 .into_iter()
                 .map(|(book, owner)| {
-                    let permission = EntityPermission::new(actor, book.created_by_id.into());
-                    let audit = hydrate_audit_dto!(book, &permission);
-
-                    BookListItemResponseDTO {
-                        id: book.id,
-                        title: book.title,
-                        author: book.author,
-                        owner: owner.unwrap().into(),
-                        audit,
-                    }
+                    let permission = EntityPermission::new(actor, book.owner_id.into());
+                    book.to_dto(owner, &permission)
                 })
                 .collect(),
         })
     }
-}
-
-#[derive(Debug, FromQueryResult)]
-struct BookListItemRow {
-    id: Uuid,
-    title: String,
-    author: String,
-    created_at: DateTimeWithTimeZone,
-    created_by_id: Uuid,
-    created_by_name: String,
-    updated_at: Option<DateTimeWithTimeZone>,
-    updated_by_id: Option<Uuid>,
-    updated_by_name: Option<String>,
 }

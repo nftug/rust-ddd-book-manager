@@ -1,28 +1,26 @@
-use derive_new::new;
-
 use crate::{
     audit::{AuditContext, EntityAudit},
     auth::{
         Actor,
         permission::{AdminPermission, EntityPermission, Permission},
     },
-    book::values,
+    book::values::*,
     shared::error::DomainError,
     user::values::UserReference,
 };
 
-#[derive(Debug, PartialEq, Eq, new)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Book {
-    pub(crate) audit: EntityAudit<values::BookId>,
-    pub(crate) title: values::BookTitle,
-    pub(crate) author: values::BookAuthor,
-    pub(crate) isbn: values::BookIsbn,
-    pub(crate) description: values::BookDescription,
-    pub(crate) owner: values::BookOwner,
+    audit: EntityAudit<BookId>,
+    title: BookTitle,
+    author: BookAuthor,
+    isbn: BookIsbn,
+    description: BookDescription,
+    owner: BookOwner,
 }
 
 impl Book {
-    pub fn audit(&self) -> &EntityAudit<values::BookId> {
+    pub fn audit(&self) -> &EntityAudit<BookId> {
         &self.audit
     }
     pub fn title(&self) -> &str {
@@ -41,13 +39,31 @@ impl Book {
         self.owner.raw()
     }
 
+    pub fn hydrate(
+        audit: EntityAudit<BookId>,
+        title: String,
+        author: String,
+        isbn: Option<String>,
+        description: Option<String>,
+        owner: UserReference,
+    ) -> Self {
+        Book {
+            audit,
+            title: BookTitle::hydrate(title),
+            author: BookAuthor::hydrate(author),
+            isbn: BookIsbn::hydrate(isbn),
+            description: BookDescription::hydrate(description),
+            owner: BookOwner::hydrate(owner),
+        }
+    }
+
     pub fn create_new(
         context: &AuditContext,
-        title: values::BookTitle,
-        author: values::BookAuthor,
-        isbn: values::BookIsbn,
-        description: values::BookDescription,
-        owner: values::BookOwner,
+        title: BookTitle,
+        author: BookAuthor,
+        isbn: BookIsbn,
+        description: BookDescription,
+        owner: BookOwner,
     ) -> Result<Self, DomainError> {
         let permission = EntityPermission::new(Some(context.actor()), owner.id());
         let audit = EntityAudit::create_new(context, &permission)?;
@@ -65,10 +81,10 @@ impl Book {
     pub fn update(
         self,
         context: &AuditContext,
-        title: values::BookTitle,
-        author: values::BookAuthor,
-        isbn: values::BookIsbn,
-        description: values::BookDescription,
+        title: BookTitle,
+        author: BookAuthor,
+        isbn: BookIsbn,
+        description: BookDescription,
     ) -> Result<Self, DomainError> {
         let permission = self.permission_to_update(context.actor());
         let audit = self.audit.mark_updated(context, &permission)?;
@@ -95,7 +111,7 @@ impl Book {
     pub fn change_owner(
         self,
         context: &AuditContext,
-        owner: values::BookOwner,
+        owner: BookOwner,
     ) -> Result<Self, DomainError> {
         let permission = AdminPermission::new(context.actor());
         let audit = self.audit.mark_updated(context, &permission)?;

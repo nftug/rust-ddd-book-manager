@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use derive_new::new;
+use uuid::Uuid;
 
 use crate::{
     audit::AuditContext,
@@ -8,7 +8,7 @@ use crate::{
     user::values::UserReference,
 };
 
-#[derive(new, Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct EntityAudit<EId: Id> {
     id: EId,
     created_at: DateTime<Utc>,
@@ -36,6 +36,28 @@ impl<EId: Id> EntityAudit<EId> {
     }
     pub fn is_new(&self) -> bool {
         self.is_new
+    }
+
+    pub fn hydrate(
+        id: Uuid,
+        created_at: DateTime<Utc>,
+        created_by_id: Uuid,
+        created_by_name: String,
+        updated_at: Option<DateTime<Utc>>,
+        updated_by_id: Option<Uuid>,
+        updated_by_name: Option<String>,
+    ) -> Self {
+        EntityAudit {
+            id: id.into(),
+            created_at,
+            created_by: UserReference::hydrate(created_by_id, created_by_name),
+            updated_at,
+            updated_by: match (updated_by_id, updated_by_name) {
+                (Some(id), Some(name)) => Some(UserReference::hydrate(id, name)),
+                _ => None,
+            },
+            is_new: false,
+        }
     }
 
     pub fn create_new(

@@ -1,8 +1,6 @@
-use derive_new::new;
-
 use crate::shared::error::DomainError;
 
-#[derive(Debug, Clone, PartialEq, Eq, new)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct UserName(String);
 
 impl UserName {
@@ -16,6 +14,10 @@ impl UserName {
             )),
             n => Ok(UserName(n)),
         }
+    }
+
+    pub fn hydrate(name: String) -> Self {
+        UserName(name)
     }
 
     pub fn raw(&self) -> &str {

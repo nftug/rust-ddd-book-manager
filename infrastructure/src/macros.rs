@@ -1,29 +1,20 @@
 macro_rules! hydrate_audit {
     ($model:expr, $id_type:ty) => {
-        domain::audit::EntityAudit::<$id_type>::new(
-            $model.id.into(),
+        domain::audit::EntityAudit::<$id_type>::hydrate(
+            $model.id,
             $model.created_at.into(),
-            domain::user::values::UserReference::new(
-                $model.created_by_id.into(),
-                domain::user::values::UserName::new($model.created_by_name.clone()),
-            ),
+            $model.created_by_id,
+            $model.created_by_name,
             $model.updated_at.map(|dt| dt.into()),
-            $model.updated_by_id.map(|id| {
-                domain::user::values::UserReference::new(
-                    id.into(),
-                    domain::user::values::UserName::new(
-                        $model.updated_by_name.clone().unwrap_or_default(),
-                    ),
-                )
-            }),
-            false,
+            $model.updated_by_id,
+            $model.updated_by_name,
         )
     };
 }
 
 macro_rules! hydrate_audit_dto {
     ($model:expr, $permission:expr) => {
-        application::shared::AuditResponseDTO {
+        application::shared::AuditDTO {
             created_at: $model.created_at.into(),
             created_by: application::shared::UserReferenceDTO {
                 id: $model.created_by_id.into(),
@@ -36,6 +27,16 @@ macro_rules! hydrate_audit_dto {
                     id,
                     name: $model.updated_by_name.clone().unwrap_or_default(),
                 }),
+            permission: ($permission as &dyn domain::auth::permission::Permission).into(),
+        }
+    };
+}
+
+macro_rules! hydrate_audit_summary_dto {
+    ($model:expr, $permission:expr) => {
+        application::shared::AuditSummaryDTO {
+            created_at: $model.created_at.into(),
+            updated_at: $model.updated_at.map(|dt| dt.into()),
             permission: ($permission as &dyn domain::auth::permission::Permission).into(),
         }
     };
@@ -70,3 +71,4 @@ pub(crate) use audit_defaults;
 pub(crate) use audit_defaults_update;
 pub(crate) use hydrate_audit;
 pub(crate) use hydrate_audit_dto;
+pub(crate) use hydrate_audit_summary_dto;
