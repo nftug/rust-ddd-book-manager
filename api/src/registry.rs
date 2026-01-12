@@ -1,13 +1,15 @@
 use std::sync::Arc;
 
 use application::{book::BookRegistry, user::UserRegistry};
-use domain::audit::clock::SystemClock;
+use domain::{audit::clock::SystemClock, auth::Actor};
 use infrastructure::{
     book::{BookQueryServiceImpl, BookRepositoryImpl},
     config::AppConfig,
     database::ConnectionPool,
     user::{UserDomainQueryServiceImpl, UserQueryServiceImpl, UserRepositoryImpl},
 };
+
+use crate::{auth::OidcUserInfo, error::ApiError};
 
 #[derive(Clone)]
 pub struct AppRegistry {
@@ -42,6 +44,28 @@ impl AppRegistry {
             book_registry: Arc::new(book_registry),
             user_registry: Arc::new(user_registry),
         })
+    }
+
+    pub async fn prepare_actor(&self, user_info: OidcUserInfo) -> Result<Actor, ApiError> {
+        self.user_registry()
+            .get_or_create_actor(user_info.try_into()?)
+            .await
+            .map_err(|e| e.into())
+    }
+
+    pub async fn prepare_optional_actor(
+        &self,
+        user_info: Option<OidcUserInfo>,
+    ) -> Result<Option<Actor>, ApiError> {
+        if let Some(info) = user_info {
+            let actor = self
+                .user_registry()
+                .get_or_create_actor(info.try_into()?)
+                .await?;
+            Ok(Some(actor))
+        } else {
+            Ok(None)
+        }
     }
 
     pub fn config(&self) -> Arc<AppConfig> {

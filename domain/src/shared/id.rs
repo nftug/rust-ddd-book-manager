@@ -20,6 +20,13 @@ macro_rules! define_id {
             }
         }
 
+        impl std::str::FromStr for $id_type {
+            type Err = Box<dyn std::error::Error>;
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                Ok(Self(uuid::Uuid::parse_str(s)?))
+            }
+        }
+
         impl std::fmt::Display for $id_type {
             fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
                 write!(f, "{}", self.0)

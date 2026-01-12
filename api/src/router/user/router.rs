@@ -1,9 +1,9 @@
 use axum::{Router, routing::get};
 
-use crate::registry::AppRegistry;
+use crate::{registry::AppRegistry, router::user::handlers::*};
 
 pub fn user_router() -> Router<AppRegistry> {
-    let user_routes = Router::new().route("/me", get(super::handlers::me_handler));
+    let user_routes = Router::new().route("/me", get(me_handler));
 
     Router::new().nest("/users", user_routes)
 }

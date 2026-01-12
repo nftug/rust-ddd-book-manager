@@ -57,6 +57,11 @@ dependencies = ["before-build"]
 command = "cargo"
 args = ["run", "-p", "api"]
 
+[tasks.build]
+extend = "set-env-local"
+command = "cargo"
+args = ["build", "--all-targets", "${@}"]
+
 [tasks.check]
 extend = "set-env-local"
 command = "cargo"
@@ -65,7 +70,7 @@ args = ["clippy", "--all", "--all-targets", "${@}"]
 [tasks.test]
 extend = "set-env-local"
 command = "cargo"
-args = ["test", "--all-features"]
+args = ["test", "--all-features", "${@}"]
 
 [tasks.sea-orm]
 extend = "set-env-local"

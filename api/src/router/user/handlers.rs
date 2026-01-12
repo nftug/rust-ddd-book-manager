@@ -8,10 +8,7 @@ pub async fn me_handler(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
 ) -> Result<impl IntoResponse, ApiError> {
-    let actor = registry
-        .user_registry()
-        .get_or_create_actor(user_info.try_into()?)
-        .await?;
+    let actor = registry.prepare_actor(user_info).await?;
 
     let response = registry
         .user_registry()
