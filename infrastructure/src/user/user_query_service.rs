@@ -2,10 +2,10 @@ use application::user::{dto::UserDetailsDTO, interface::UserQueryService};
 use async_trait::async_trait;
 use derive_new::new;
 use domain::shared::error::PersistenceError;
-use sea_orm::{EntityTrait, QuerySelect};
+use sea_orm::EntityTrait;
 use uuid::Uuid;
 
-use crate::database::{ConnectionPool, entity::users, row::user_rows::UserDetailsRow};
+use crate::database::{ConnectionPool, entity::users, row::user_rows::UserDetailsDTORow};
 
 #[derive(new)]
 pub struct UserQueryServiceImpl {
@@ -19,14 +19,7 @@ impl UserQueryService for UserQueryServiceImpl {
         user_id: Uuid,
     ) -> Result<Option<UserDetailsDTO>, PersistenceError> {
         let result = users::Entity::find_by_id(user_id)
-            .select_only()
-            .columns([
-                users::Column::Id,
-                users::Column::Name,
-                users::Column::Email,
-                users::Column::Role,
-            ])
-            .into_model::<UserDetailsRow>()
+            .into_partial_model::<UserDetailsDTORow>()
             .one(self.db.inner_ref())
             .await
             .map_err(|_| PersistenceError::OperationError)?;

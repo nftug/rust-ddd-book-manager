@@ -5,7 +5,7 @@ use domain::{
     shared::{Id, error::PersistenceError},
     user::{interface::UserDomainQueryService, values::UserId},
 };
-use sea_orm::{EntityTrait, QuerySelect};
+use sea_orm::EntityTrait;
 
 use crate::database::{ConnectionPool, entity::users, row::user_rows::ActorRow};
 
@@ -18,9 +18,7 @@ pub struct UserDomainQueryServiceImpl {
 impl UserDomainQueryService for UserDomainQueryServiceImpl {
     async fn find_actor_by_id(&self, id: UserId) -> Result<Option<Actor>, PersistenceError> {
         let result = users::Entity::find_by_id(id.raw())
-            .select_only()
-            .columns([users::Column::Id, users::Column::Name, users::Column::Role])
-            .into_model::<ActorRow>()
+            .into_partial_model::<ActorRow>()
             .one(self.db.inner_ref())
             .await
             .map_err(|_| PersistenceError::OperationError)?;

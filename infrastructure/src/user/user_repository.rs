@@ -10,7 +10,7 @@ use sea_orm::{ActiveValue::Set, EntityTrait};
 
 use crate::{
     database::{ConnectionPool, entity::users},
-    macros::{audit_defaults, audit_defaults_update, hydrate_audit},
+    macros::{audit_defaults, hydrate_audit},
 };
 
 #[derive(new)]
@@ -42,32 +42,19 @@ impl UserRepository for UserRepositoryImpl {
     }
 
     async fn save(&self, user: &User) -> Result<(), PersistenceError> {
-        if user.audit().is_new() {
-            let active_model = users::ActiveModel {
-                name: Set(user.name().into()),
-                email: Set(user.email().into()),
-                role: Set(user.role().as_ref().into()),
-                ..audit_defaults!(users::ActiveModel, user.audit())
-            };
+        let active_model = users::ActiveModel {
+            name: Set(user.name().into()),
+            email: Set(user.email().into()),
+            role: Set(user.role().as_ref().into()),
+            ..audit_defaults!(users::ActiveModel, user.audit())
+        };
 
+        if user.audit().is_new() {
             users::Entity::insert(active_model)
                 .exec(self.db.inner_ref())
                 .await
                 .map_err(|_| PersistenceError::OperationError)?;
         } else {
-            let mut active_model: users::ActiveModel =
-                users::Entity::find_by_id(user.audit().id().raw())
-                    .one(self.db.inner_ref())
-                    .await
-                    .map_err(|_| PersistenceError::OperationError)?
-                    .ok_or(PersistenceError::NotFound)?
-                    .into();
-
-            active_model.name = Set(user.name().into());
-            active_model.email = Set(user.email().into());
-            active_model.role = Set(user.role().as_ref().into());
-            audit_defaults_update!(active_model, user.audit());
-
             users::Entity::update(active_model)
                 .exec(self.db.inner_ref())
                 .await

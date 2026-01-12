@@ -4,15 +4,15 @@ use domain::{
     book::{entity::Book, interface::BookRepository, values::*},
     shared::{Id, error::PersistenceError},
 };
-use sea_orm::{ActiveValue::Set, EntityTrait, QuerySelect};
+use sea_orm::{ActiveValue::Set, EntityTrait};
 
 use crate::{
     database::{
         ConnectionPool,
         entity::{books, users},
-        row::user_rows::UserReferenceRow,
+        row::book_rows::BookDetailsRow,
     },
-    macros::{audit_defaults, audit_defaults_update, hydrate_audit},
+    macros::audit_defaults,
 };
 
 #[derive(new)]
@@ -23,63 +23,35 @@ pub struct BookRepositoryImpl {
 #[async_trait]
 impl BookRepository for BookRepositoryImpl {
     async fn find(&self, id: BookId) -> Result<Option<Book>, PersistenceError> {
-        let result: Option<(books::Model, Option<UserReferenceRow>)> =
-            books::Entity::find_by_id(id.raw())
-                .inner_join(users::Entity)
-                .select_also(users::Entity)
-                .columns([users::Column::Id, users::Column::Name])
-                .into_model()
-                .one(self.db.inner_ref())
-                .await
-                .map_err(|_| PersistenceError::OperationError)?;
+        let result = books::Entity::find_by_id(id.raw())
+            .inner_join(users::Entity)
+            .into_partial_model::<BookDetailsRow>()
+            .one(self.db.inner_ref())
+            .await
+            .map_err(|_| PersistenceError::OperationError)?;
 
         match result {
-            Some((book, Some(owner))) => {
-                let audit = hydrate_audit!(book, BookId);
-                Ok(Some(Book::hydrate(
-                    audit,
-                    book.title,
-                    book.author,
-                    book.isbn,
-                    book.description,
-                    owner.into(),
-                )))
-            }
+            Some(book) => Ok(Some(book.to_entity())),
             _ => Ok(None),
         }
     }
 
     async fn save(&self, book: &Book) -> Result<(), PersistenceError> {
-        if book.audit().is_new() {
-            let active_model = books::ActiveModel {
-                title: Set(book.title().into()),
-                author: Set(book.author().into()),
-                isbn: Set(book.isbn().map(|v| v.into())),
-                description: Set(book.description().map(|v| v.into())),
-                owner_id: Set(book.owner().id().raw()),
-                ..audit_defaults!(books::ActiveModel, book.audit())
-            };
+        let active_model = books::ActiveModel {
+            title: Set(book.title().into()),
+            author: Set(book.author().into()),
+            isbn: Set(book.isbn().map(|v| v.into())),
+            description: Set(book.description().map(|v| v.into())),
+            owner_id: Set(book.owner().id().raw()),
+            ..audit_defaults!(books::ActiveModel, book.audit())
+        };
 
+        if book.audit().is_new() {
             books::Entity::insert(active_model)
                 .exec(self.db.inner_ref())
                 .await
                 .map_err(|_| PersistenceError::OperationError)?;
         } else {
-            let mut active_model: books::ActiveModel =
-                books::Entity::find_by_id(book.audit().id().raw())
-                    .one(self.db.inner_ref())
-                    .await
-                    .map_err(|_| PersistenceError::OperationError)?
-                    .ok_or(PersistenceError::NotFound)?
-                    .into();
-
-            active_model.title = Set(book.title().into());
-            active_model.author = Set(book.author().into());
-            active_model.isbn = Set(book.isbn().map(|v| v.into()));
-            active_model.description = Set(book.description().map(|v| v.into()));
-            active_model.owner_id = Set(book.owner().id().raw());
-            audit_defaults_update!(active_model, book.audit());
-
             books::Entity::update(active_model)
                 .exec(self.db.inner_ref())
                 .await

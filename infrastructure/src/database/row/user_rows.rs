@@ -6,12 +6,15 @@ use domain::{
     shared::error::PersistenceError,
     user::{enums::UserRole, values::UserReference},
 };
-use sea_orm::FromQueryResult;
+use sea_orm::{DerivePartialModel, FromQueryResult};
 use uuid::Uuid;
 
-#[derive(Debug, FromQueryResult)]
+#[derive(DerivePartialModel, FromQueryResult, Clone)]
+#[sea_orm(entity = "crate::database::entity::users::Entity")]
 pub struct UserReferenceRow {
+    #[sea_orm(from_alias = "user_id")]
     pub id: Uuid,
+    #[sea_orm(from_alias = "user_name")]
     pub name: String,
 }
 
@@ -30,15 +33,16 @@ impl From<UserReferenceRow> for UserReferenceDTO {
     }
 }
 
-#[derive(Debug, FromQueryResult)]
-pub struct UserDetailsRow {
+#[derive(DerivePartialModel, FromQueryResult)]
+#[sea_orm(entity = "crate::database::entity::users::Entity")]
+pub struct UserDetailsDTORow {
     pub id: Uuid,
     pub name: String,
     pub email: String,
     pub role: String,
 }
 
-impl UserDetailsRow {
+impl UserDetailsDTORow {
     pub fn to_dto(self) -> Result<UserDetailsDTO, PersistenceError> {
         Ok(UserDetailsDTO {
             id: self.id,
@@ -50,7 +54,8 @@ impl UserDetailsRow {
     }
 }
 
-#[derive(Debug, FromQueryResult)]
+#[derive(DerivePartialModel, FromQueryResult)]
+#[sea_orm(entity = "crate::database::entity::users::Entity")]
 pub struct ActorRow {
     pub id: Uuid,
     pub name: String,

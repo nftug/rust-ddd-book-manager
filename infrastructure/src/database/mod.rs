@@ -17,7 +17,7 @@ impl From<&DatabaseConfig> for ConnectOptions {
         options
             .max_connections(100)
             .min_connections(5)
-            .sqlx_logging(true);
+            .sqlx_logging(false);
         options
     }
 }

@@ -47,8 +47,8 @@ impl From<&dyn Permission> for PermissionResponseDTO {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PaginationResponseDTO<T> {
-    pub limit: usize,
-    pub page: usize,
-    pub total_count: usize,
+    pub limit: u64,
+    pub page: u64,
+    pub total_count: u64,
     pub items: Vec<T>,
 }

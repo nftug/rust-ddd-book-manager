@@ -4,10 +4,10 @@ macro_rules! hydrate_audit {
             $model.id,
             $model.created_at.into(),
             $model.created_by_id,
-            $model.created_by_name,
+            $model.created_by_name.clone(),
             $model.updated_at.map(|dt| dt.into()),
             $model.updated_by_id,
-            $model.updated_by_name,
+            $model.updated_by_name.clone(),
         )
     };
 }
@@ -59,16 +59,7 @@ macro_rules! audit_defaults {
     };
 }
 
-macro_rules! audit_defaults_update {
-    ($active_model:expr, $audit:expr) => {
-        $active_model.updated_at = Set($audit.updated_at().map(|v| v.into()));
-        $active_model.updated_by_id = Set($audit.updated_by().map(|u| u.id().raw()));
-        $active_model.updated_by_name = Set($audit.updated_by().map(|u| u.name().into()));
-    };
-}
-
 pub(crate) use audit_defaults;
-pub(crate) use audit_defaults_update;
 pub(crate) use hydrate_audit;
 pub(crate) use hydrate_audit_dto;
 pub(crate) use hydrate_audit_summary_dto;
