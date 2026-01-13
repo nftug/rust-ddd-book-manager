@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 
 use crate::{
-    auth::Actor,
+    audit::Actor,
     shared::error::PersistenceError,
     user::{entity::User, values::UserId},
 };

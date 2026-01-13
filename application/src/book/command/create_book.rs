@@ -2,10 +2,8 @@ use std::sync::Arc;
 
 use derive_new::new;
 use domain::{
-    audit::{AuditContext, Clock},
-    auth::Actor,
+    audit::{Actor, AuditContext, Clock},
     book::{entity::Book, interface::BookRepository},
-    shared::Id,
 };
 
 use crate::{
@@ -38,6 +36,6 @@ impl CreateBookService {
 
         self.book_repository.save(&book).await?;
 
-        Ok(EntityCreationDTO::new(book.audit().id().raw()))
+        Ok(book.audit().into())
     }
 }

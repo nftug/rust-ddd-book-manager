@@ -1,6 +1,9 @@
 use derive_new::new;
 
-use crate::{auth::Actor, user::enums::UserRole, user::values::UserId};
+use crate::{
+    audit::Actor,
+    user::{enums::UserRole, values::UserId},
+};
 
 pub trait Permission {
     fn can_create(&self) -> bool;
@@ -19,13 +22,13 @@ impl AdminPermission {
 
 impl Permission for AdminPermission {
     fn can_create(&self) -> bool {
-        self.0.role == UserRole::Admin
+        self.0.role() == UserRole::Admin
     }
     fn can_update(&self) -> bool {
-        self.0.role == UserRole::Admin
+        self.0.role() == UserRole::Admin
     }
     fn can_delete(&self) -> bool {
-        self.0.role == UserRole::Admin
+        self.0.role() == UserRole::Admin
     }
 }
 
@@ -40,13 +43,13 @@ impl SystemPermission {
 
 impl Permission for SystemPermission {
     fn can_create(&self) -> bool {
-        self.0.role == UserRole::System
+        self.0.role() == UserRole::System
     }
     fn can_update(&self) -> bool {
-        self.0.role == UserRole::System
+        self.0.role() == UserRole::System
     }
     fn can_delete(&self) -> bool {
-        self.0.role == UserRole::System
+        self.0.role() == UserRole::System
     }
 }
 
@@ -66,7 +69,9 @@ impl EntityPermission {
 
     fn can_edit(&self) -> bool {
         match self.actor {
-            Some(ref actor) => actor.role != UserRole::Regular || actor.id() == self.owner_user_id,
+            Some(ref actor) => {
+                actor.role() != UserRole::Regular || actor.id() == self.owner_user_id
+            }
             None => false,
         }
     }

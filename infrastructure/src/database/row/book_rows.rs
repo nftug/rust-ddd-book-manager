@@ -30,30 +30,30 @@ pub struct BookDetailsRow {
 }
 
 impl BookDetailsRow {
-    pub fn to_dto(&self, permission: &dyn Permission) -> BookDetailsDTO {
+    pub fn to_dto(self, permission: &dyn Permission) -> BookDetailsDTO {
         let audit = hydrate_audit_dto!(self, permission);
 
         BookDetailsDTO {
             id: self.id,
-            title: self.title.clone(),
-            author: self.author.clone(),
-            isbn: self.isbn.clone(),
-            description: self.description.clone(),
-            owner: self.user.clone().into(),
+            title: self.title,
+            author: self.author,
+            isbn: self.isbn,
+            description: self.description,
+            owner: self.user.to_dto(),
             audit,
         }
     }
 
-    pub fn to_entity(&self) -> Book {
+    pub fn to_entity(self) -> Book {
         let audit = hydrate_audit!(self, BookId);
 
         Book::hydrate(
             audit,
-            self.title.clone(),
-            self.author.clone(),
-            self.isbn.clone(),
-            self.description.clone(),
-            self.user.clone().into(),
+            self.title,
+            self.author,
+            self.isbn,
+            self.description,
+            self.user.to_domain(),
         )
     }
 }
@@ -72,14 +72,14 @@ pub struct BookListItemRow {
 }
 
 impl BookListItemRow {
-    pub fn to_dto(&self, permission: &dyn Permission) -> BookListItemDTO {
+    pub fn to_dto(self, permission: &dyn Permission) -> BookListItemDTO {
         let audit = hydrate_audit_summary_dto!(self, permission);
 
         BookListItemDTO {
             id: self.id,
-            title: self.title.clone(),
-            author: self.author.clone(),
-            owner: self.user.clone().into(),
+            title: self.title,
+            author: self.author,
+            owner: self.user.to_dto(),
             audit,
         }
     }

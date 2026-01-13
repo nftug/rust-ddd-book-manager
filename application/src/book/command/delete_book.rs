@@ -2,8 +2,7 @@ use std::sync::Arc;
 
 use derive_new::new;
 use domain::{
-    audit::{AuditContext, Clock},
-    auth::Actor,
+    audit::{Actor, AuditContext, Clock},
     book::interface::BookRepository,
 };
 use uuid::Uuid;

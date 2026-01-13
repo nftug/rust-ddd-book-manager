@@ -2,9 +2,7 @@ use std::sync::Arc;
 
 use derive_new::new;
 use domain::{
-    audit::{AuditContext, Clock},
-    auth::Actor,
-    shared::Id,
+    audit::{Actor, AuditContext, Clock},
     user::{
         entity::User,
         interface::{UserDomainQueryService, UserRepository},
@@ -45,9 +43,9 @@ impl GetOrCreateActorService {
             self.user_repository.save(&new_user).await?;
 
             Ok(Actor::hydrate(
-                new_user.audit().id().raw(),
+                new_user.audit().id().into(),
                 new_user.name().into(),
-                new_user.role().clone(),
+                new_user.role(),
             ))
         }
     }

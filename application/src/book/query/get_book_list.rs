@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use derive_new::new;
-use domain::auth::Actor;
+use domain::audit::Actor;
 
 use crate::{
     book::{

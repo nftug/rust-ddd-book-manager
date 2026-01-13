@@ -87,18 +87,18 @@ impl<EId: Id> EntityAudit<EId> {
     }
 
     pub fn mark_updated(
-        self,
+        &mut self,
         context: &AuditContext,
         permission: &dyn Permission,
-    ) -> Result<Self, DomainError> {
+    ) -> Result<(), DomainError> {
         if !permission.can_update() {
             return Err(DomainError::Forbidden);
         }
 
-        Ok(EntityAudit {
-            updated_at: Some(context.timestamp()),
-            updated_by: Some(context.actor_user().clone()),
-            ..self
-        })
+        self.updated_at = Some(context.timestamp());
+        self.updated_by = Some(context.actor_user().clone());
+        self.is_new = false;
+
+        Ok(())
     }
 }

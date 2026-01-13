@@ -1,6 +1,9 @@
 use std::sync::Arc;
 
-use domain::{audit::Clock, auth::Actor, book::interface::BookRepository};
+use domain::{
+    audit::{Actor, Clock},
+    book::interface::BookRepository,
+};
 use uuid::Uuid;
 
 use crate::{

@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use domain::{auth::Actor, shared::error::PersistenceError};
+use domain::{audit::Actor, shared::error::PersistenceError};
 use uuid::Uuid;
 
 use crate::book::dto::{BookDetailsDTO, BookListQueryDTO, BookListResponseDTO};

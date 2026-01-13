@@ -2,7 +2,7 @@ use std::str::FromStr;
 
 use application::{shared::UserReferenceDTO, user::dto::UserDetailsDTO};
 use domain::{
-    auth::Actor,
+    audit::Actor,
     shared::error::PersistenceError,
     user::{enums::UserRole, values::UserReference},
 };
@@ -18,17 +18,15 @@ pub struct UserReferenceRow {
     pub name: String,
 }
 
-impl From<UserReferenceRow> for UserReference {
-    fn from(row: UserReferenceRow) -> Self {
-        UserReference::hydrate(row.id, row.name)
+impl UserReferenceRow {
+    pub fn to_domain(self) -> UserReference {
+        UserReference::hydrate(self.id, self.name)
     }
-}
 
-impl From<UserReferenceRow> for UserReferenceDTO {
-    fn from(row: UserReferenceRow) -> Self {
+    pub fn to_dto(self) -> UserReferenceDTO {
         UserReferenceDTO {
-            id: row.id,
-            name: row.name,
+            id: self.id,
+            name: self.name,
         }
     }
 }
@@ -46,8 +44,8 @@ impl UserDetailsDTORow {
     pub fn to_dto(self) -> Result<UserDetailsDTO, PersistenceError> {
         Ok(UserDetailsDTO {
             id: self.id,
-            name: self.name.clone(),
-            email: self.email.clone(),
+            name: self.name,
+            email: self.email,
             role: UserRole::from_str(&self.role)
                 .map_err(|e| PersistenceError::EntityConversionError(e.to_string()))?,
         })

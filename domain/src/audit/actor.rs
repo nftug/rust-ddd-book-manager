@@ -7,8 +7,8 @@ use crate::user::{
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Actor {
-    pub(crate) user: UserReference,
-    pub(crate) role: UserRole,
+    pub(super) user: UserReference,
+    pub(super) role: UserRole,
 }
 
 impl Actor {
@@ -17,6 +17,9 @@ impl Actor {
     }
     pub fn username(&self) -> &str {
         self.user.name()
+    }
+    pub fn role(&self) -> UserRole {
+        self.role
     }
 
     pub fn hydrate(id: Uuid, name: String, role: UserRole) -> Self {
@@ -34,8 +37,8 @@ impl Actor {
     }
 }
 
-impl From<Actor> for UserReference {
-    fn from(actor: Actor) -> Self {
-        actor.user
+impl From<&Actor> for UserReference {
+    fn from(actor: &Actor) -> Self {
+        actor.user.clone()
     }
 }

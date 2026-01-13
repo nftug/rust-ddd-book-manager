@@ -36,6 +36,7 @@ pub async fn get_book_list_handler(
         .book_registry()
         .get_book_list(actor.as_ref(), query)
         .await?;
+
     Ok(Json(response))
 }
 

@@ -1,6 +1,5 @@
 use chrono::{DateTime, Utc};
-use derive_new::new;
-use domain::auth::permission::Permission;
+use domain::{audit::EntityAudit, auth::permission::Permission, shared::Id};
 use serde::Serialize;
 use uuid::Uuid;
 
@@ -54,8 +53,15 @@ pub struct PaginationDTO<T> {
     pub items: Vec<T>,
 }
 
-#[derive(Debug, Serialize, new)]
+#[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct EntityCreationDTO {
     pub id: Uuid,
+}
+
+impl<EId: Id> From<&EntityAudit<EId>> for EntityCreationDTO {
+    fn from(audit: &EntityAudit<EId>) -> Self {
+        let id = audit.id().into();
+        EntityCreationDTO { id }
+    }
 }

@@ -2,8 +2,7 @@ use std::sync::Arc;
 
 use derive_new::new;
 use domain::{
-    audit::{AuditContext, Clock},
-    auth::Actor,
+    audit::{Actor, AuditContext, Clock},
     book::interface::BookRepository,
 };
 use uuid::Uuid;
@@ -24,13 +23,14 @@ impl UpdateBookService {
         request: UpdateBookRequestDTO,
     ) -> Result<(), ApplicationError> {
         let context = AuditContext::new(actor, self.clock.as_ref());
-        let book = self
+
+        let mut book = self
             .book_repository
             .find(book_id.into())
             .await?
             .ok_or(ApplicationError::NotFound)?;
 
-        let updated_book = book.update(
+        book.update(
             &context,
             request.title.try_into()?,
             request.author.try_into()?,
@@ -38,7 +38,7 @@ impl UpdateBookService {
             request.description.try_into()?,
         )?;
 
-        self.book_repository.save(&updated_book).await?;
+        self.book_repository.save(&book).await?;
 
         Ok(())
     }

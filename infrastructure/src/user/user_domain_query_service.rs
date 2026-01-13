@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 use derive_new::new;
 use domain::{
-    auth::Actor,
+    audit::Actor,
     shared::{Id, error::PersistenceError},
     user::{interface::UserDomainQueryService, values::UserId},
 };

@@ -1,8 +1,6 @@
-use derive_new::new;
-
 use crate::shared::error::DomainError;
 
-#[derive(Debug, Clone, PartialEq, Eq, new)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BookTitle(String);
 
 impl BookTitle {

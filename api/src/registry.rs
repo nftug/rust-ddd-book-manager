@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use application::{book::BookRegistry, user::UserRegistry};
-use domain::{audit::clock::SystemClock, auth::Actor};
+use domain::audit::{Actor, clock::SystemClock};
 use infrastructure::{
     book::{BookQueryServiceImpl, BookRepositoryImpl},
     config::AppConfig,

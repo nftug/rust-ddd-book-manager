@@ -1,10 +1,7 @@
 use application::book::{dto::*, interface::BookQueryService};
 use async_trait::async_trait;
 use derive_new::new;
-use domain::{
-    auth::{Actor, permission::EntityPermission},
-    shared::error::PersistenceError,
-};
+use domain::{audit::Actor, auth::permission::EntityPermission, shared::error::PersistenceError};
 use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect};
 use uuid::Uuid;
 

@@ -1,6 +1,9 @@
 use chrono::{DateTime, Utc};
 
-use crate::{audit::Clock, auth::Actor, user::values::UserReference};
+use crate::{
+    audit::{Actor, Clock},
+    user::values::UserReference,
+};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct AuditContext {

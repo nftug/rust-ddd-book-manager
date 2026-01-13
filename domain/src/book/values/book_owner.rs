@@ -1,12 +1,10 @@
-use derive_new::new;
-
 use crate::{
-    auth::Actor,
+    audit::Actor,
     shared::error::DomainError,
     user::values::{UserId, UserReference},
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, new)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BookOwner(UserReference);
 
 impl BookOwner {
@@ -37,6 +35,6 @@ impl BookOwner {
 
 impl From<&Actor> for BookOwner {
     fn from(actor: &Actor) -> Self {
-        Self(actor.clone().into())
+        Self(actor.into())
     }
 }

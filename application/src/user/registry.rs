@@ -1,8 +1,7 @@
 use std::sync::Arc;
 
 use domain::{
-    audit::Clock,
-    auth::Actor,
+    audit::{Actor, Clock},
     user::interface::{UserDomainQueryService, UserRepository},
 };
 use uuid::Uuid;

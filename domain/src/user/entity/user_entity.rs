@@ -2,7 +2,7 @@ use crate::{
     audit::{AuditContext, EntityAudit},
     auth::permission::{EntityPermission, PassThroughPermission},
     shared::error::DomainError,
-    user::{enums, values::*},
+    user::{enums::*, values::*},
 };
 
 #[derive(Debug, PartialEq, Eq)]
@@ -10,7 +10,7 @@ pub struct User {
     audit: EntityAudit<UserId>,
     name: UserName,
     email: UserEmail,
-    role: enums::UserRole,
+    role: UserRole,
 }
 
 impl User {
@@ -23,17 +23,17 @@ impl User {
     pub fn email(&self) -> &str {
         self.email.raw()
     }
-    pub fn role(&self) -> &enums::UserRole {
-        &self.role
+    pub fn role(&self) -> UserRole {
+        self.role
     }
 
     pub fn hydrate(
         audit: EntityAudit<UserId>,
         name: String,
         email: String,
-        role: enums::UserRole,
+        role: UserRole,
     ) -> Self {
-        User {
+        Self {
             audit,
             name: UserName::hydrate(name),
             email: UserEmail::hydrate(email),
@@ -46,13 +46,12 @@ impl User {
         user_id: UserId,
         name: UserName,
         email: UserEmail,
-        role: enums::UserRole,
+        role: UserRole,
     ) -> Result<Self, DomainError> {
         let permission = PassThroughPermission::new();
-        let audit = EntityAudit::create_new_with_id(context, &permission, user_id)?;
 
-        Ok(User {
-            audit,
+        Ok(Self {
+            audit: EntityAudit::create_new_with_id(context, &permission, user_id)?,
             name,
             email,
             role,
@@ -60,20 +59,19 @@ impl User {
     }
 
     pub fn update(
-        self,
+        &mut self,
         context: &AuditContext,
         name: UserName,
         email: UserEmail,
-        role: enums::UserRole,
-    ) -> Result<Self, DomainError> {
+        role: UserRole,
+    ) -> Result<(), DomainError> {
         let permission = EntityPermission::new(Some(context.actor()), self.audit.id());
-        let audit = self.audit.mark_updated(context, &permission)?;
 
-        Ok(User {
-            audit,
-            name,
-            email,
-            role,
-        })
+        self.audit.mark_updated(context, &permission)?;
+        self.name = name;
+        self.email = email;
+        self.role = role;
+
+        Ok(())
     }
 }

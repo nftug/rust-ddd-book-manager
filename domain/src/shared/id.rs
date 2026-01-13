@@ -20,6 +20,12 @@ macro_rules! define_id {
             }
         }
 
+        impl From<$id_type> for uuid::Uuid {
+            fn from(id: $id_type) -> Self {
+                id.0
+            }
+        }
+
         impl std::str::FromStr for $id_type {
             type Err = Box<dyn std::error::Error>;
             fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -38,7 +44,9 @@ macro_rules! define_id {
 pub mod id_type {
     use uuid::Uuid;
 
-    pub trait Id: Sized + Clone + std::fmt::Debug + PartialEq + Eq + Copy + From<Uuid> {
+    pub trait Id:
+        Sized + Clone + std::fmt::Debug + PartialEq + Eq + Copy + From<Uuid> + Into<Uuid>
+    {
         fn new() -> Self;
         fn raw(self) -> uuid::Uuid;
     }

@@ -1,9 +1,6 @@
 use crate::{
-    audit::{AuditContext, EntityAudit},
-    auth::{
-        Actor,
-        permission::{AdminPermission, EntityPermission, Permission},
-    },
+    audit::{Actor, AuditContext, EntityAudit},
+    auth::permission::{AdminPermission, EntityPermission, Permission},
     book::values::*,
     shared::error::DomainError,
     user::values::UserReference,
@@ -66,10 +63,9 @@ impl Book {
         owner: BookOwner,
     ) -> Result<Self, DomainError> {
         let permission = EntityPermission::new(Some(context.actor()), owner.id());
-        let audit = EntityAudit::create_new(context, &permission)?;
 
-        Ok(Book {
-            audit,
+        Ok(Self {
+            audit: EntityAudit::create_new(context, &permission)?,
             title,
             author,
             isbn,
@@ -79,28 +75,27 @@ impl Book {
     }
 
     pub fn update(
-        self,
+        &mut self,
         context: &AuditContext,
         title: BookTitle,
         author: BookAuthor,
         isbn: BookIsbn,
         description: BookDescription,
-    ) -> Result<Self, DomainError> {
+    ) -> Result<(), DomainError> {
         let permission = self.permission_to_update(context.actor());
-        let audit = self.audit.mark_updated(context, &permission)?;
 
-        Ok(Book {
-            audit,
-            title,
-            author,
-            isbn,
-            description,
-            ..self
-        })
+        self.audit.mark_updated(context, &permission)?;
+        self.title = title;
+        self.author = author;
+        self.isbn = isbn;
+        self.description = description;
+
+        Ok(())
     }
 
     pub fn validate_deletion(&self, context: &AuditContext) -> Result<(), DomainError> {
         let permission = self.permission_to_update(context.actor());
+
         if !permission.can_delete() {
             return Err(DomainError::Forbidden);
         }
@@ -109,18 +104,16 @@ impl Book {
     }
 
     pub fn change_owner(
-        self,
+        &mut self,
         context: &AuditContext,
         owner: BookOwner,
-    ) -> Result<Self, DomainError> {
+    ) -> Result<(), DomainError> {
         let permission = AdminPermission::new(context.actor());
-        let audit = self.audit.mark_updated(context, &permission)?;
 
-        Ok(Book {
-            audit,
-            owner,
-            ..self
-        })
+        self.audit.mark_updated(context, &permission)?;
+        self.owner = owner;
+
+        Ok(())
     }
 
     fn permission_to_update(&self, actor: &Actor) -> EntityPermission {
