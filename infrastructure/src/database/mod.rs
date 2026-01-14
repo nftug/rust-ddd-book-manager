@@ -1,5 +1,6 @@
+use domain::shared::error::PersistenceError;
 use sea_orm::{
-    ConnectOptions, Database, DatabaseConnection, DatabaseTransaction, TransactionTrait,
+    ConnectOptions, Database, DatabaseConnection, DatabaseTransaction, DbErr, TransactionTrait,
 };
 
 use crate::config::DatabaseConfig;
@@ -38,4 +39,9 @@ impl ConnectionPool {
     pub async fn begin_transaction(&self) -> Result<DatabaseTransaction, sea_orm::DbErr> {
         self.0.begin().await
     }
+}
+
+pub fn log_db_error(err: DbErr) -> PersistenceError {
+    tracing::error!("Database error: {}", err);
+    PersistenceError::OperationError
 }

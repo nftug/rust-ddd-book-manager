@@ -1,7 +1,5 @@
 use axum::{Json, extract::State, response::IntoResponse};
 
-use domain::shared::id::Id as DomainId;
-
 use crate::{auth::OidcUserInfo, error::ApiError, registry::AppRegistry};
 
 pub async fn me_handler(
@@ -12,7 +10,7 @@ pub async fn me_handler(
 
     let response = registry
         .user_registry()
-        .get_user_details(actor.id().raw())
+        .get_user_details(actor.raw_id())
         .await?;
 
     Ok(Json(response))

@@ -31,12 +31,24 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 with_audit_columns!(
+                    Authors,
+                    Table::create()
+                        .table(Authors::Table)
+                        .if_not_exists()
+                        .col(ColumnDef::new(Authors::Name).string_len(255).not_null())
+                )
+                .to_owned(),
+            )
+            .await?;
+
+        manager
+            .create_table(
+                with_audit_columns!(
                     Books,
                     Table::create()
                         .table(Books::Table)
                         .if_not_exists()
                         .col(ColumnDef::new(Books::Title).string_len(255).not_null())
-                        .col(ColumnDef::new(Books::Author).string_len(255).not_null())
                         .col(ColumnDef::new(Books::Isbn).string_len(13).null())
                         .col(ColumnDef::new(Books::Description).string_len(1000).null())
                         .col(ColumnDef::new(Books::OwnerId).uuid().not_null())
@@ -53,12 +65,56 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
+        manager
+            .create_table(
+                Table::create()
+                    .table(BookAuthors::Table)
+                    .if_not_exists()
+                    .col(ColumnDef::new(BookAuthors::BookId).uuid().not_null())
+                    .col(ColumnDef::new(BookAuthors::AuthorId).uuid().not_null())
+                    .col(
+                        ColumnDef::new(BookAuthors::OrderIndex)
+                            .unsigned()
+                            .not_null(),
+                    )
+                    .primary_key(
+                        Index::create()
+                            .name("pk_book_authors")
+                            .col(BookAuthors::BookId)
+                            .col(BookAuthors::AuthorId),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_book_authors_book_id")
+                            .from(BookAuthors::Table, BookAuthors::BookId)
+                            .to(Books::Table, Books::Id)
+                            .on_delete(ForeignKeyAction::Cascade)
+                            .on_update(ForeignKeyAction::Cascade),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_book_authors_author_id")
+                            .from(BookAuthors::Table, BookAuthors::AuthorId)
+                            .to(Authors::Table, Authors::Id)
+                            .on_delete(ForeignKeyAction::Cascade)
+                            .on_update(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
         Ok(())
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
+            .drop_table(Table::drop().table(BookAuthors::Table).to_owned())
+            .await?;
+        manager
             .drop_table(Table::drop().table(Books::Table).to_owned())
+            .await?;
+        manager
+            .drop_table(Table::drop().table(Authors::Table).to_owned())
             .await?;
         manager
             .drop_table(Table::drop().table(Users::Table).to_owned())
@@ -72,7 +128,6 @@ enum Books {
     Table,
     Id,
     Title,
-    Author,
     Isbn,
     Description,
     OwnerId,
@@ -97,4 +152,25 @@ enum Users {
     UpdatedAt,
     UpdatedById,
     UpdatedByName,
+}
+
+#[derive(DeriveIden)]
+enum Authors {
+    Table,
+    Id,
+    Name,
+    CreatedAt,
+    CreatedById,
+    CreatedByName,
+    UpdatedAt,
+    UpdatedById,
+    UpdatedByName,
+}
+
+#[derive(DeriveIden)]
+enum BookAuthors {
+    Table,
+    BookId,
+    AuthorId,
+    OrderIndex,
 }

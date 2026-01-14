@@ -15,12 +15,14 @@ pub struct EntityAudit<EId: Id> {
     created_by: UserReference,
     updated_at: Option<DateTime<Utc>>,
     updated_by: Option<UserReference>,
-    is_new: bool,
 }
 
 impl<EId: Id> EntityAudit<EId> {
     pub fn id(&self) -> EId {
         self.id
+    }
+    pub fn raw_id(&self) -> Uuid {
+        self.id.raw()
     }
     pub fn created_at(&self) -> DateTime<Utc> {
         self.created_at
@@ -33,9 +35,6 @@ impl<EId: Id> EntityAudit<EId> {
     }
     pub fn updated_by(&self) -> Option<&UserReference> {
         self.updated_by.as_ref()
-    }
-    pub fn is_new(&self) -> bool {
-        self.is_new
     }
 
     pub fn hydrate(
@@ -56,7 +55,6 @@ impl<EId: Id> EntityAudit<EId> {
                 (Some(id), Some(name)) => Some(UserReference::hydrate(id, name)),
                 _ => None,
             },
-            is_new: false,
         }
     }
 
@@ -82,7 +80,6 @@ impl<EId: Id> EntityAudit<EId> {
             created_by: context.actor_user().clone(),
             updated_at: None,
             updated_by: None,
-            is_new: true,
         })
     }
 
@@ -97,7 +94,6 @@ impl<EId: Id> EntityAudit<EId> {
 
         self.updated_at = Some(context.timestamp());
         self.updated_by = Some(context.actor_user().clone());
-        self.is_new = false;
 
         Ok(())
     }

@@ -7,8 +7,9 @@ use uuid::Uuid;
 
 use crate::database::{
     ConnectionPool,
-    entity::{books, users},
-    row::book_rows::{BookDetailsRow, BookListItemRow},
+    entity::{authors, book_authors, books, users},
+    log_db_error,
+    row::book::{aggregate::*, rows::*},
 };
 
 #[derive(new)]
@@ -23,20 +24,19 @@ impl BookQueryService for BookQueryServiceImpl {
         actor: Option<&Actor>,
         book_id: Uuid,
     ) -> Result<Option<BookDetailsDTO>, PersistenceError> {
-        let result = books::Entity::find_by_id(book_id)
+        let rows = books::Entity::find_by_id(book_id)
+            .inner_join(authors::Entity)
             .inner_join(users::Entity)
+            .order_by_asc(book_authors::Column::OrderIndex)
             .into_partial_model::<BookDetailsRow>()
-            .one(self.db.inner_ref())
+            .all(self.db.inner_ref())
             .await
-            .map_err(|_| PersistenceError::OperationError)?;
+            .map_err(log_db_error)?;
 
-        match result {
-            Some(book) => {
-                let permission = EntityPermission::new(actor, book.created_by_id.into());
-                Ok(Some(book.to_dto(&permission)))
-            }
-            _ => Ok(None),
-        }
+        Ok(AggregatedBookDetails::from_rows(rows).map(|agg| {
+            let permission = EntityPermission::new(actor, agg.row.created_by_id.into());
+            agg.to_dto(&permission)
+        }))
     }
 
     async fn get_book_list(
@@ -45,7 +45,9 @@ impl BookQueryService for BookQueryServiceImpl {
         query: &BookListQueryDTO,
     ) -> Result<BookListResponseDTO, PersistenceError> {
         let get_query = || {
-            let mut select = books::Entity::find().inner_join(users::Entity);
+            let mut select = books::Entity::find()
+                .inner_join(authors::Entity)
+                .inner_join(users::Entity);
 
             if let Some(owner_id) = query.owner_id {
                 select = select.filter(users::Column::Id.eq(owner_id));
@@ -58,24 +60,25 @@ impl BookQueryService for BookQueryServiceImpl {
             .select_only()
             .count(self.db.inner_ref())
             .await
-            .map_err(|_| PersistenceError::OperationError)?;
+            .map_err(log_db_error)?;
 
         let rows = get_query()
             .order_by_desc(books::Column::CreatedAt)
+            .order_by_asc(book_authors::Column::OrderIndex)
             .into_partial_model::<BookListItemRow>()
             .paginate(self.db.inner_ref(), query.limit)
             .fetch_page(query.page - 1)
             .await
-            .map_err(|_| PersistenceError::OperationError)?;
+            .map_err(log_db_error)?;
 
         Ok(BookListResponseDTO {
             limit: query.limit,
             page: query.page,
             total_count,
-            items: rows
+            items: AggregatedBookListItem::from_rows(rows)
                 .into_iter()
                 .map(|book| {
-                    let permission = EntityPermission::new(actor, book.user.id.into());
+                    let permission = EntityPermission::new(actor, book.row.user.id.into());
                     book.to_dto(&permission)
                 })
                 .collect(),

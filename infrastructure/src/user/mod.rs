@@ -1,7 +1,7 @@
-mod user_domain_query_service;
-mod user_query_service;
-mod user_repository;
+mod domain_query_service;
+mod query_service;
+mod repository;
 
-pub use user_domain_query_service::UserDomainQueryServiceImpl;
-pub use user_query_service::UserQueryServiceImpl;
-pub use user_repository::UserRepositoryImpl;
+pub use domain_query_service::UserDomainQueryServiceImpl;
+pub use query_service::UserQueryServiceImpl;
+pub use repository::UserRepositoryImpl;

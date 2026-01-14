@@ -5,7 +5,7 @@ use domain::shared::error::PersistenceError;
 use sea_orm::EntityTrait;
 use uuid::Uuid;
 
-use crate::database::{ConnectionPool, entity::users, row::user_rows::UserDetailsDTORow};
+use crate::database::{ConnectionPool, entity::users, log_db_error, row::user::UserDetailsDTORow};
 
 #[derive(new)]
 pub struct UserQueryServiceImpl {
@@ -22,7 +22,7 @@ impl UserQueryService for UserQueryServiceImpl {
             .into_partial_model::<UserDetailsDTORow>()
             .one(self.db.inner_ref())
             .await
-            .map_err(|_| PersistenceError::OperationError)?;
+            .map_err(log_db_error)?;
 
         match result {
             Some(user) => user.to_dto().map(Some),

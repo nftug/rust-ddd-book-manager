@@ -18,17 +18,17 @@ pub struct UserRegistry {
 
 impl UserRegistry {
     pub fn new(
-        user_repository: Arc<dyn UserRepository>,
-        user_query_service: Arc<dyn UserQueryService>,
-        user_domain_query_service: Arc<dyn UserDomainQueryService>,
+        repository: Arc<dyn UserRepository>,
+        query_service: Arc<dyn UserQueryService>,
+        domain_query_service: Arc<dyn UserDomainQueryService>,
         clock: Arc<dyn Clock>,
     ) -> Self {
         let get_or_create_actor = GetOrCreateActorService::new(
             clock.clone(),
-            user_domain_query_service.clone(),
-            user_repository.clone(),
+            domain_query_service.clone(),
+            repository.clone(),
         );
-        let get_user_details = GetUserDetailsService::new(user_query_service.clone());
+        let get_user_details = GetUserDetailsService::new(query_service.clone());
 
         UserRegistry {
             get_or_create_user: Arc::new(get_or_create_actor),

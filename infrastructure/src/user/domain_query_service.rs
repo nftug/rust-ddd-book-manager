@@ -7,7 +7,7 @@ use domain::{
 };
 use sea_orm::EntityTrait;
 
-use crate::database::{ConnectionPool, entity::users, row::user_rows::ActorRow};
+use crate::database::{ConnectionPool, entity::users, log_db_error, row::user::ActorRow};
 
 #[derive(new)]
 pub struct UserDomainQueryServiceImpl {
@@ -21,7 +21,7 @@ impl UserDomainQueryService for UserDomainQueryServiceImpl {
             .into_partial_model::<ActorRow>()
             .one(self.db.inner_ref())
             .await
-            .map_err(|_| PersistenceError::OperationError)?;
+            .map_err(log_db_error)?;
 
         match result {
             Some(actor_row) => Ok(Some(actor_row.to_actor()?)),

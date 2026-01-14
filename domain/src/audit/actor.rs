@@ -15,6 +15,9 @@ impl Actor {
     pub fn id(&self) -> UserId {
         self.user.id()
     }
+    pub fn raw_id(&self) -> Uuid {
+        self.user.raw_id()
+    }
     pub fn username(&self) -> &str {
         self.user.name()
     }

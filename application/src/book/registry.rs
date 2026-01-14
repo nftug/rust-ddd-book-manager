@@ -7,6 +7,7 @@ use domain::{
 use uuid::Uuid;
 
 use crate::{
+    author::service::AuthorsFactoryService,
     book::{command::*, dto::*, interface::BookQueryService, query::*},
     shared::{EntityCreationDTO, error::ApplicationError},
 };
@@ -21,15 +22,24 @@ pub struct BookRegistry {
 
 impl BookRegistry {
     pub fn new(
-        book_repository: Arc<dyn BookRepository>,
-        book_queryservice: Arc<dyn BookQueryService>,
+        repository: Arc<dyn BookRepository>,
+        query_service: Arc<dyn BookQueryService>,
+        authors_factory_service: Arc<AuthorsFactoryService>,
         clock: Arc<dyn Clock>,
     ) -> Self {
-        let create_book = CreateBookService::new(clock.clone(), book_repository.clone());
-        let update_book = UpdateBookService::new(clock.clone(), book_repository.clone());
-        let delete_book = DeleteBookService::new(clock.clone(), book_repository.clone());
-        let get_book_details = GetBookDetailsService::new(book_queryservice.clone());
-        let get_book_list = GetBookListService::new(book_queryservice.clone());
+        let create_book = CreateBookService::new(
+            clock.clone(),
+            repository.clone(),
+            authors_factory_service.clone(),
+        );
+        let update_book = UpdateBookService::new(
+            clock.clone(),
+            repository.clone(),
+            authors_factory_service.clone(),
+        );
+        let delete_book = DeleteBookService::new(clock.clone(), repository.clone());
+        let get_book_details = GetBookDetailsService::new(query_service.clone());
+        let get_book_list = GetBookListService::new(query_service.clone());
 
         BookRegistry {
             create_book: Arc::new(create_book),

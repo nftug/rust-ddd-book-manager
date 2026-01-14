@@ -3,10 +3,12 @@ use std::sync::Arc;
 use derive_new::new;
 use domain::{
     audit::{Actor, AuditContext, Clock},
-    book::{entity::Book, interface::BookRepository},
+    author::values::AuthorName,
+    book::{entity::Book, interface::BookRepository, values::BookAuthorList},
 };
 
 use crate::{
+    author::service::AuthorsFactoryService,
     book::dto::CreateBookRequestDTO,
     shared::{EntityCreationDTO, error::ApplicationError},
 };
@@ -15,6 +17,7 @@ use crate::{
 pub struct CreateBookService {
     clock: Arc<dyn Clock>,
     book_repository: Arc<dyn BookRepository>,
+    authors_factory_service: Arc<AuthorsFactoryService>,
 }
 
 impl CreateBookService {
@@ -25,10 +28,21 @@ impl CreateBookService {
     ) -> Result<EntityCreationDTO, ApplicationError> {
         let context = AuditContext::new(actor, self.clock.as_ref());
 
+        let author_names = request
+            .author_names
+            .into_iter()
+            .map(|name| name.try_into())
+            .collect::<Result<Vec<AuthorName>, _>>()?;
+
+        let authors_refs = self
+            .authors_factory_service
+            .ensure_authors_exist(&context, &author_names)
+            .await?;
+
         let book = Book::create_new(
             &context,
             request.title.try_into()?,
-            request.author.try_into()?,
+            BookAuthorList::try_new(author_names, authors_refs)?,
             request.isbn.try_into()?,
             request.description.try_into()?,
             actor.into(),

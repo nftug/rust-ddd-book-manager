@@ -2,5 +2,7 @@
 
 pub mod prelude;
 
+pub mod authors;
+pub mod book_authors;
 pub mod books;
 pub mod users;

@@ -46,12 +46,12 @@ macro_rules! audit_defaults {
     ($active_model:path, $audit:expr) => {
         ({
             $active_model {
-                id: Set($audit.id().raw()),
+                id: Set($audit.raw_id()),
                 created_at: Set($audit.created_at().into()),
-                created_by_id: Set($audit.created_by().id().raw()),
+                created_by_id: Set($audit.created_by().raw_id()),
                 created_by_name: Set($audit.created_by().name().into()),
                 updated_at: Set($audit.updated_at().map(|v| v.into())),
-                updated_by_id: Set($audit.updated_by().map(|u| u.id().raw())),
+                updated_by_id: Set($audit.updated_by().map(|u| u.raw_id())),
                 updated_by_name: Set($audit.updated_by().map(|u| u.name().into())),
                 ..Default::default()
             }

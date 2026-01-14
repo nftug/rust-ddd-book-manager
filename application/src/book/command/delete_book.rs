@@ -21,7 +21,7 @@ impl DeleteBookService {
 
         let book = self
             .book_repository
-            .find(book_id.into())
+            .find_by_id(book_id.into())
             .await?
             .ok_or(ApplicationError::NotFound)?;
 

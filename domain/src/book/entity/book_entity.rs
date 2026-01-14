@@ -1,6 +1,7 @@
 use crate::{
     audit::{Actor, AuditContext, EntityAudit},
     auth::permission::{AdminPermission, EntityPermission, Permission},
+    author::values::AuthorReference,
     book::values::*,
     shared::error::DomainError,
     user::values::UserReference,
@@ -10,7 +11,7 @@ use crate::{
 pub struct Book {
     audit: EntityAudit<BookId>,
     title: BookTitle,
-    author: BookAuthor,
+    authors: BookAuthorList,
     isbn: BookIsbn,
     description: BookDescription,
     owner: BookOwner,
@@ -23,8 +24,8 @@ impl Book {
     pub fn title(&self) -> &str {
         self.title.raw()
     }
-    pub fn author(&self) -> &str {
-        self.author.raw()
+    pub fn authors(&self) -> &BookAuthorList {
+        &self.authors
     }
     pub fn isbn(&self) -> Option<&str> {
         self.isbn.raw()
@@ -39,7 +40,7 @@ impl Book {
     pub fn hydrate(
         audit: EntityAudit<BookId>,
         title: String,
-        author: String,
+        authors: Vec<(AuthorReference, usize)>,
         isbn: Option<String>,
         description: Option<String>,
         owner: UserReference,
@@ -47,7 +48,7 @@ impl Book {
         Book {
             audit,
             title: BookTitle::hydrate(title),
-            author: BookAuthor::hydrate(author),
+            authors: BookAuthorList::hydrate(authors),
             isbn: BookIsbn::hydrate(isbn),
             description: BookDescription::hydrate(description),
             owner: BookOwner::hydrate(owner),
@@ -57,7 +58,7 @@ impl Book {
     pub fn create_new(
         context: &AuditContext,
         title: BookTitle,
-        author: BookAuthor,
+        authors: BookAuthorList,
         isbn: BookIsbn,
         description: BookDescription,
         owner: BookOwner,
@@ -67,7 +68,7 @@ impl Book {
         Ok(Self {
             audit: EntityAudit::create_new(context, &permission)?,
             title,
-            author,
+            authors,
             isbn,
             description,
             owner,
@@ -78,7 +79,7 @@ impl Book {
         &mut self,
         context: &AuditContext,
         title: BookTitle,
-        author: BookAuthor,
+        authors: BookAuthorList,
         isbn: BookIsbn,
         description: BookDescription,
     ) -> Result<(), DomainError> {
@@ -86,7 +87,7 @@ impl Book {
 
         self.audit.mark_updated(context, &permission)?;
         self.title = title;
-        self.author = author;
+        self.authors = authors;
         self.isbn = isbn;
         self.description = description;
 
@@ -96,11 +97,10 @@ impl Book {
     pub fn validate_deletion(&self, context: &AuditContext) -> Result<(), DomainError> {
         let permission = self.permission_to_update(context.actor());
 
-        if !permission.can_delete() {
-            return Err(DomainError::Forbidden);
+        match permission.can_delete() {
+            true => Ok(()),
+            false => Err(DomainError::Forbidden),
         }
-
-        Ok(())
     }
 
     pub fn change_owner(

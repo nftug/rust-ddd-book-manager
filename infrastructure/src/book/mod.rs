@@ -1,5 +1,5 @@
-mod book_query_service;
-mod book_repository;
+mod query_service;
+mod repository;
 
-pub use book_query_service::BookQueryServiceImpl;
-pub use book_repository::BookRepositoryImpl;
+pub use query_service::BookQueryServiceImpl;
+pub use repository::BookRepositoryImpl;

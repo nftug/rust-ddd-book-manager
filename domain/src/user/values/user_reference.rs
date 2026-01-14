@@ -19,6 +19,9 @@ impl UserReference {
     pub fn id(&self) -> UserId {
         self.id
     }
+    pub fn raw_id(&self) -> Uuid {
+        self.id.into()
+    }
     pub fn name(&self) -> &str {
         self.name.raw()
     }

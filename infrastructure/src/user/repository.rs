@@ -6,10 +6,10 @@ use domain::{
     shared::{Id, error::PersistenceError},
     user::{entity::User, enums::UserRole, interface::UserRepository, values::*},
 };
-use sea_orm::{ActiveValue::Set, EntityTrait};
+use sea_orm::{ActiveValue::Set, ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter};
 
 use crate::{
-    database::{ConnectionPool, entity::users},
+    database::{ConnectionPool, entity::users, log_db_error},
     macros::{audit_defaults, hydrate_audit},
 };
 
@@ -20,11 +20,11 @@ pub struct UserRepositoryImpl {
 
 #[async_trait]
 impl UserRepository for UserRepositoryImpl {
-    async fn find(&self, id: UserId) -> Result<Option<User>, PersistenceError> {
+    async fn find_by_id(&self, id: UserId) -> Result<Option<User>, PersistenceError> {
         let result = users::Entity::find_by_id(id.raw())
             .one(self.db.inner_ref())
             .await
-            .map_err(|_| PersistenceError::OperationError)?;
+            .map_err(log_db_error)?;
 
         match result {
             Some(user) => {
@@ -49,16 +49,23 @@ impl UserRepository for UserRepositoryImpl {
             ..audit_defaults!(users::ActiveModel, user.audit())
         };
 
-        if user.audit().is_new() {
-            users::Entity::insert(active_model)
-                .exec(self.db.inner_ref())
-                .await
-                .map_err(|_| PersistenceError::OperationError)?;
-        } else {
+        let exists = users::Entity::find()
+            .filter(users::Column::Id.eq(user.audit().raw_id()))
+            .count(self.db.inner_ref())
+            .await
+            .map_err(log_db_error)?
+            > 0;
+
+        if exists {
             users::Entity::update(active_model)
                 .exec(self.db.inner_ref())
                 .await
-                .map_err(|_| PersistenceError::OperationError)?;
+                .map_err(log_db_error)?;
+        } else {
+            users::Entity::insert(active_model)
+                .exec(self.db.inner_ref())
+                .await
+                .map_err(log_db_error)?;
         }
 
         Ok(())
@@ -68,7 +75,7 @@ impl UserRepository for UserRepositoryImpl {
         let result = users::Entity::delete_by_id(id.raw())
             .exec(self.db.inner_ref())
             .await
-            .map_err(|_| PersistenceError::OperationError)?;
+            .map_err(log_db_error)?;
 
         if result.rows_affected == 0 {
             Err(PersistenceError::NotFound)

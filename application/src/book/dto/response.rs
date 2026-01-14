@@ -1,14 +1,17 @@
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::shared::{AuditDTO, AuditSummaryDTO, PaginationDTO, UserReferenceDTO};
+use crate::{
+    author::dto::AuthorSummaryDTO,
+    shared::{AuditDTO, AuditSummaryDTO, PaginationDTO, UserReferenceDTO},
+};
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct BookDetailsDTO {
     pub id: Uuid,
     pub title: String,
-    pub author: String,
+    pub authors: Vec<AuthorSummaryDTO>,
     pub isbn: Option<String>,
     pub description: Option<String>,
     pub owner: UserReferenceDTO,
@@ -20,7 +23,7 @@ pub struct BookDetailsDTO {
 pub struct BookListItemDTO {
     pub id: Uuid,
     pub title: String,
-    pub author: String,
+    pub authors: Vec<AuthorSummaryDTO>,
     pub owner: UserReferenceDTO,
     pub audit: AuditSummaryDTO,
 }
