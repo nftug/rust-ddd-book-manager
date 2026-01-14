@@ -55,12 +55,18 @@ args = [
 extend = "set-env-local"
 dependencies = ["before-build"]
 command = "cargo"
-args = ["run", "-p", "api"]
+args = ["run", "-p", "api", "${@}"]
+
+[tasks.run-release]
+extend = "set-env-local"
+dependencies = ["before-build"]
+command = "./target/release/api"
+args = ["${@}"]
 
 [tasks.build]
 extend = "set-env-local"
 command = "cargo"
-args = ["build", "--all-targets", "${@}"]
+args = ["build", "-p", "api", "${@}"]
 
 [tasks.check]
 extend = "set-env-local"

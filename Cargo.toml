@@ -22,3 +22,10 @@ strum = { version = "0.27.2", features = ["derive"] }
 itertools = "0.14.0"
 tracing = { version = "0.1.44", features = ["log"] }
 async-trait = "0.1.89"
+
+[profile.release]
+lto = true
+opt-level = "z"
+codegen-units = 1
+panic = "abort"
+strip = "symbols"
