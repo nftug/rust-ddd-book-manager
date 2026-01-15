@@ -16,7 +16,7 @@ pub struct BookDetailsDTO {
     pub isbn: Option<String>,
     pub description: Option<String>,
     pub owner: UserReferenceDTO,
-    pub checkout: Option<BookCheckoutDTO>,
+    pub checkout: Option<CheckoutDTO>,
     pub audit: AuditDTO,
 }
 
@@ -35,8 +35,10 @@ pub type BookListResponseDTO = PaginationDTO<BookListItemDTO>;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
-pub struct BookCheckoutDTO {
+pub struct CheckoutDTO {
     pub checkout_id: Uuid,
     pub checked_out_at: DateTime<Utc>,
     pub checked_out_to: UserReferenceDTO,
 }
+
+pub type CheckoutHistoryDTO = PaginationDTO<CheckoutDTO>;

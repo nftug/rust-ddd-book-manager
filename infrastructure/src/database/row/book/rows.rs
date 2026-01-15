@@ -1,4 +1,4 @@
-use application::{book::dto::BookCheckoutDTO, shared::UserReferenceDTO};
+use application::{book::dto::CheckoutDTO, shared::UserReferenceDTO};
 use domain::{book::values::BookCheckout, user::values::UserReference};
 use sea_orm::{DerivePartialModel, FromQueryResult, prelude::DateTimeWithTimeZone};
 use uuid::Uuid;
@@ -63,8 +63,8 @@ impl BookCheckoutRow {
         )
     }
 
-    pub fn to_dto(self) -> BookCheckoutDTO {
-        BookCheckoutDTO {
+    pub fn to_dto(self) -> CheckoutDTO {
+        CheckoutDTO {
             checkout_id: self.checkout_id,
             checked_out_at: self.checked_out_at.into(),
             checked_out_to: UserReferenceDTO {

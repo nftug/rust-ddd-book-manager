@@ -66,6 +66,11 @@ impl BookQueryService for BookQueryServiceImpl {
                     );
                 }
             }
+            if let Some(checked_out_to_id) = query.checked_out_to_id {
+                select = select
+                    .filter(book_checkouts::Column::CheckedOutById.eq(checked_out_to_id))
+                    .filter(book_checkouts::Column::ReturnedAt.is_null());
+            }
 
             select
         };
@@ -96,6 +101,36 @@ impl BookQueryService for BookQueryServiceImpl {
                     book.to_dto(&permission)
                 })
                 .collect(),
+        })
+    }
+
+    async fn get_checkout_history(
+        &self,
+        book_id: Uuid,
+        query: &CheckoutHistoryQueryDTO,
+    ) -> Result<CheckoutHistoryDTO, PersistenceError> {
+        let get_query =
+            || book_checkouts::Entity::find().filter(book_checkouts::Column::BookId.eq(book_id));
+
+        let total_count = get_query()
+            .select_only()
+            .count(self.db.inner_ref())
+            .await
+            .map_err(log_db_error)?;
+
+        let rows = get_query()
+            .order_by_desc(book_checkouts::Column::CheckedOutAt)
+            .into_partial_model::<BookCheckoutRow>()
+            .paginate(self.db.inner_ref(), query.limit)
+            .fetch_page(query.page - 1)
+            .await
+            .map_err(log_db_error)?;
+
+        Ok(CheckoutHistoryDTO {
+            limit: query.limit,
+            page: query.page,
+            total_count,
+            items: rows.into_iter().map(|row| row.to_dto()).collect(),
         })
     }
 }

@@ -85,3 +85,46 @@ pub async fn delete_book_handler(
 
     Ok(StatusCode::NO_CONTENT)
 }
+
+pub async fn get_checkout_history_handler(
+    State(registry): State<AppRegistry>,
+    Path(book_id): Path<Uuid>,
+    Query(query): Query<CheckoutHistoryQueryDTO>,
+) -> Result<impl IntoResponse, ApiError> {
+    let response = registry
+        .book_registry()
+        .get_checkout_history(book_id, query)
+        .await?;
+
+    Ok(Json(response))
+}
+
+pub async fn checkout_book_handler(
+    State(registry): State<AppRegistry>,
+    user_info: OidcUserInfo,
+    Path(book_id): Path<Uuid>,
+) -> Result<impl IntoResponse, ApiError> {
+    let actor = registry.prepare_actor(user_info).await?;
+
+    registry
+        .book_registry()
+        .checkout_book(&actor, book_id)
+        .await?;
+
+    Ok(StatusCode::NO_CONTENT)
+}
+
+pub async fn return_book_handler(
+    State(registry): State<AppRegistry>,
+    user_info: OidcUserInfo,
+    Path(book_id): Path<Uuid>,
+) -> Result<impl IntoResponse, ApiError> {
+    let actor = registry.prepare_actor(user_info).await?;
+
+    registry
+        .book_registry()
+        .return_book(&actor, book_id)
+        .await?;
+
+    Ok(StatusCode::NO_CONTENT)
+}
