@@ -12,7 +12,7 @@ use sea_orm::{
 use crate::{
     database::{
         ConnectionPool,
-        entity::{authors, book_authors, books, users},
+        entity::{authors, book_authors, book_checkouts, books, users},
         log_db_error,
         row::book::{aggregate::AggregatedBookDetails, rows::BookDetailsRow},
     },
@@ -30,6 +30,7 @@ impl BookRepository for BookRepositoryImpl {
         let rows = books::Entity::find_by_id(id.raw())
             .inner_join(authors::Entity)
             .inner_join(users::Entity)
+            .left_join(book_checkouts::Entity)
             .order_by_asc(book_authors::Column::OrderIndex)
             .into_partial_model::<BookDetailsRow>()
             .all(self.db.inner_ref())
@@ -74,7 +75,6 @@ impl BookRepository for BookRepositoryImpl {
         // Upsert book authors
         let book_authors = book
             .authors()
-            .raw()
             .iter()
             .map(|author_ref| book_authors::ActiveModel {
                 book_id: Set(book.audit().raw_id()),
@@ -89,6 +89,30 @@ impl BookRepository for BookRepositoryImpl {
             .await
             .map_err(log_db_error)?;
         book_authors::Entity::insert_many(book_authors)
+            .exec(&txn)
+            .await
+            .map_err(log_db_error)?;
+
+        // Upsert book checkouts
+        let book_checkouts = book
+            .checkouts()
+            .iter()
+            .map(|checkout| book_checkouts::ActiveModel {
+                checkout_id: Set(checkout.id()),
+                book_id: Set(book.audit().raw_id()),
+                checked_out_at: Set(checkout.checked_out_at().into()),
+                checked_out_by_id: Set(checkout.checked_out_by().raw_id()),
+                checked_out_by_name: Set(checkout.checked_out_by().name().to_string()),
+                returned_at: Set(checkout.returned_at().map(|dt| dt.into())),
+            })
+            .collect::<Vec<_>>();
+
+        book_checkouts::Entity::delete_many()
+            .filter(book_checkouts::Column::BookId.eq(book.audit().raw_id()))
+            .exec(&txn)
+            .await
+            .map_err(log_db_error)?;
+        book_checkouts::Entity::insert_many(book_checkouts)
             .exec(&txn)
             .await
             .map_err(log_db_error)?;

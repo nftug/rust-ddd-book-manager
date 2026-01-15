@@ -59,13 +59,13 @@ impl BookAuthorList {
         ))
     }
 
-    pub fn raw(&self) -> Vec<OrderedAuthorReference> {
-        self.0.clone()
+    pub fn raw(&self) -> &[OrderedAuthorReference] {
+        &self.0
     }
 
     pub fn raw_ids(&self) -> Vec<Uuid> {
         self.raw()
-            .into_iter()
+            .iter()
             .map(|ordered_author| ordered_author.0.raw_id())
             .collect()
     }

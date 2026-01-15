@@ -16,6 +16,11 @@ pub fn book_router() -> Router<AppRegistry> {
                 get(get_book_details_handler)
                     .put(update_book_handler)
                     .delete(delete_book_handler),
-            ),
+            )
+            .route(
+                "/{book_id}/checkouts",
+                post(checkout_book_handler).get(get_checkout_history_handler),
+            )
+            .route("/{book_id}/return", post(return_book_handler)),
     )
 }

@@ -15,6 +15,7 @@ pub struct Book {
     isbn: BookIsbn,
     description: BookDescription,
     owner: BookOwner,
+    checkouts: BookCheckoutList,
 }
 
 impl Book {
@@ -24,8 +25,8 @@ impl Book {
     pub fn title(&self) -> &str {
         self.title.raw()
     }
-    pub fn authors(&self) -> &BookAuthorList {
-        &self.authors
+    pub fn authors(&self) -> &[OrderedAuthorReference] {
+        self.authors.raw()
     }
     pub fn isbn(&self) -> Option<&str> {
         self.isbn.raw()
@@ -36,6 +37,9 @@ impl Book {
     pub fn owner(&self) -> &UserReference {
         self.owner.raw()
     }
+    pub fn checkouts(&self) -> &[BookCheckout] {
+        self.checkouts.raw()
+    }
 
     pub fn hydrate(
         audit: EntityAudit<BookId>,
@@ -44,6 +48,7 @@ impl Book {
         isbn: Option<String>,
         description: Option<String>,
         owner: UserReference,
+        checkouts: Vec<BookCheckout>,
     ) -> Self {
         Book {
             audit,
@@ -52,6 +57,7 @@ impl Book {
             isbn: BookIsbn::hydrate(isbn),
             description: BookDescription::hydrate(description),
             owner: BookOwner::hydrate(owner),
+            checkouts: BookCheckoutList::hydrate(checkouts),
         }
     }
 
@@ -72,6 +78,7 @@ impl Book {
             isbn,
             description,
             owner,
+            checkouts: BookCheckoutList::hydrate(vec![]),
         })
     }
 
@@ -101,6 +108,14 @@ impl Book {
             true => Ok(()),
             false => Err(DomainError::Forbidden),
         }
+    }
+
+    pub fn do_checkout(&mut self, context: &AuditContext) -> Result<(), DomainError> {
+        self.checkouts.do_checkout(context)
+    }
+
+    pub fn do_return(&mut self, context: &AuditContext) -> Result<(), DomainError> {
+        self.checkouts.do_return(context)
     }
 
     pub fn change_owner(
