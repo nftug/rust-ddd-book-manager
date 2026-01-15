@@ -42,6 +42,6 @@ impl ConnectionPool {
 }
 
 pub fn log_db_error(err: DbErr) -> PersistenceError {
-    tracing::error!("Database error: {}", err);
+    tracing::error!(error = ?err, "Database operation failed");
     PersistenceError::OperationError
 }

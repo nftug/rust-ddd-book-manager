@@ -11,6 +11,6 @@ pub enum ApplicationError {
     NotFound,
     #[error("Forbidden")]
     Forbidden,
-    #[error("Internal server error")]
-    InternalError,
+    #[error("Internal server error: {0}")]
+    InternalError(String),
 }
