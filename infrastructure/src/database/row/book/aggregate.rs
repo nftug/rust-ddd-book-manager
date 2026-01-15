@@ -10,6 +10,7 @@ use crate::{
     database::row::{
         author::BookAuthorRow,
         book::rows::{BookDetailsRow, BookListItemRow},
+        rows::BookCheckoutRow,
     },
     macros::{hydrate_audit, hydrate_audit_dto, hydrate_audit_summary_dto},
 };
@@ -17,13 +18,15 @@ use crate::{
 pub struct AggregatedBookDetails {
     pub row: BookDetailsRow,
     pub authors: Vec<BookAuthorRow>,
+    pub checkouts: Vec<BookCheckoutRow>,
 }
 
 impl AggregatedBookDetails {
     pub fn from_rows(rows: Vec<BookDetailsRow>) -> Option<Self> {
         Some(Self {
             row: rows.first()?.clone(),
-            authors: rows.into_iter().map(|r| r.author).collect(),
+            authors: rows.iter().map(|r| r.author.clone()).collect(),
+            checkouts: rows.iter().map(|r| r.checkout.clone()).collect(),
         })
     }
 
@@ -35,6 +38,12 @@ impl AggregatedBookDetails {
             isbn: self.row.isbn,
             description: self.row.description,
             owner: self.row.user.to_dto(),
+            checkout: self
+                .checkouts
+                .into_iter()
+                .filter(|c| c.returned_at.is_none())
+                .max_by_key(|c| c.checked_out_at)
+                .map(|c| c.to_dto()),
             audit: hydrate_audit_dto!(self.row, permission),
         }
     }
@@ -54,6 +63,7 @@ impl AggregatedBookDetails {
             self.row.isbn,
             self.row.description,
             self.row.user.to_domain(),
+            self.checkouts.into_iter().map(|c| c.to_domain()).collect(),
         )
     }
 }
@@ -61,6 +71,7 @@ impl AggregatedBookDetails {
 pub struct AggregatedBookListItem {
     pub row: BookListItemRow,
     pub authors: Vec<BookAuthorRow>,
+    pub checkouts: Vec<BookCheckoutRow>,
 }
 
 impl AggregatedBookListItem {
@@ -70,7 +81,8 @@ impl AggregatedBookListItem {
             .into_values()
             .map(|group| AggregatedBookListItem {
                 row: group[0].clone(),
-                authors: group.into_iter().map(|r| r.author).collect(),
+                authors: group.iter().map(|r| r.author.clone()).collect(),
+                checkouts: group.iter().map(|r| r.checkout.clone()).collect(),
             })
             .collect()
     }
@@ -81,6 +93,7 @@ impl AggregatedBookListItem {
             title: self.row.title,
             authors: self.authors.into_iter().map(|a| a.to_dto()).collect(),
             owner: self.row.user.to_dto(),
+            checked_out: self.checkouts.into_iter().any(|c| c.returned_at.is_none()),
             audit: hydrate_audit_summary_dto!(self.row, permission),
         }
     }

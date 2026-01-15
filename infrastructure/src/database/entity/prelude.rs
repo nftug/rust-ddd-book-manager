@@ -2,5 +2,6 @@
 
 pub use super::authors::Entity as Authors;
 pub use super::book_authors::Entity as BookAuthors;
+pub use super::book_checkouts::Entity as BookCheckouts;
 pub use super::books::Entity as Books;
 pub use super::users::Entity as Users;

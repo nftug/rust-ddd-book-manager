@@ -3,7 +3,7 @@ use serde::Deserialize;
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Validate)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "snake_case")]
 pub struct BookListQueryDTO {
     #[garde(range(min = 1))]
     #[serde(default = "default_limit")]
@@ -13,6 +13,8 @@ pub struct BookListQueryDTO {
     pub page: u64,
     #[garde(skip)]
     pub owner_id: Option<Uuid>,
+    #[garde(skip)]
+    pub checked_out: Option<bool>,
 }
 
 const fn default_limit() -> u64 {

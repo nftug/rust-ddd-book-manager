@@ -7,7 +7,7 @@ use uuid::Uuid;
 
 use crate::database::{
     ConnectionPool,
-    entity::{authors, book_authors, books, users},
+    entity::{authors, book_authors, book_checkouts, books, users},
     log_db_error,
     row::book::{aggregate::*, rows::*},
 };
@@ -27,6 +27,7 @@ impl BookQueryService for BookQueryServiceImpl {
         let rows = books::Entity::find_by_id(book_id)
             .inner_join(authors::Entity)
             .inner_join(users::Entity)
+            .left_join(book_checkouts::Entity)
             .order_by_asc(book_authors::Column::OrderIndex)
             .into_partial_model::<BookDetailsRow>()
             .all(self.db.inner_ref())
@@ -47,10 +48,23 @@ impl BookQueryService for BookQueryServiceImpl {
         let get_query = || {
             let mut select = books::Entity::find()
                 .inner_join(authors::Entity)
-                .inner_join(users::Entity);
+                .inner_join(users::Entity)
+                .left_join(book_checkouts::Entity);
 
             if let Some(owner_id) = query.owner_id {
                 select = select.filter(users::Column::Id.eq(owner_id));
+            }
+            if let Some(checked_out) = query.checked_out {
+                if checked_out {
+                    select = select.filter(book_checkouts::Column::ReturnedAt.is_null());
+                } else {
+                    // Never checked out books or already returned books
+                    select = select.filter(
+                        book_checkouts::Column::CheckoutId
+                            .is_null()
+                            .or(book_checkouts::Column::ReturnedAt.is_not_null()),
+                    );
+                }
             }
 
             select

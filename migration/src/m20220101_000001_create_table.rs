@@ -103,12 +103,59 @@ impl MigrationTrait for Migration {
             )
             .await?;
 
+        manager
+            .create_table(
+                Table::create()
+                    .table(BookCheckouts::Table)
+                    .if_not_exists()
+                    .col(
+                        ColumnDef::new(BookCheckouts::CheckoutId)
+                            .uuid()
+                            .not_null()
+                            .primary_key(),
+                    )
+                    .col(ColumnDef::new(BookCheckouts::BookId).uuid().not_null())
+                    .col(
+                        ColumnDef::new(BookCheckouts::CheckedOutAt)
+                            .timestamp_with_time_zone()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(BookCheckouts::CheckedOutById)
+                            .uuid()
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(BookCheckouts::CheckedOutByName)
+                            .string_len(100)
+                            .not_null(),
+                    )
+                    .col(
+                        ColumnDef::new(BookCheckouts::ReturnedAt)
+                            .timestamp_with_time_zone()
+                            .null(),
+                    )
+                    .foreign_key(
+                        ForeignKey::create()
+                            .name("fk_book_checkouts_book_id")
+                            .from(BookCheckouts::Table, BookCheckouts::BookId)
+                            .to(Books::Table, Books::Id)
+                            .on_delete(ForeignKeyAction::Cascade)
+                            .on_update(ForeignKeyAction::Cascade),
+                    )
+                    .to_owned(),
+            )
+            .await?;
+
         Ok(())
     }
 
     async fn down(&self, manager: &SchemaManager) -> Result<(), DbErr> {
         manager
             .drop_table(Table::drop().table(BookAuthors::Table).to_owned())
+            .await?;
+        manager
+            .drop_table(Table::drop().table(BookCheckouts::Table).to_owned())
             .await?;
         manager
             .drop_table(Table::drop().table(Books::Table).to_owned())
@@ -173,4 +220,15 @@ enum BookAuthors {
     BookId,
     AuthorId,
     OrderIndex,
+}
+
+#[derive(DeriveIden)]
+enum BookCheckouts {
+    Table,
+    CheckoutId,
+    BookId,
+    CheckedOutAt,
+    CheckedOutById,
+    CheckedOutByName,
+    ReturnedAt,
 }

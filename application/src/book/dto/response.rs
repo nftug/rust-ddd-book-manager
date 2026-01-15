@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::Serialize;
 use uuid::Uuid;
 
@@ -15,6 +16,7 @@ pub struct BookDetailsDTO {
     pub isbn: Option<String>,
     pub description: Option<String>,
     pub owner: UserReferenceDTO,
+    pub checkout: Option<BookCheckoutDTO>,
     pub audit: AuditDTO,
 }
 
@@ -25,7 +27,16 @@ pub struct BookListItemDTO {
     pub title: String,
     pub authors: Vec<AuthorSummaryDTO>,
     pub owner: UserReferenceDTO,
+    pub checked_out: bool,
     pub audit: AuditSummaryDTO,
 }
 
 pub type BookListResponseDTO = PaginationDTO<BookListItemDTO>;
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BookCheckoutDTO {
+    pub checkout_id: Uuid,
+    pub checked_out_at: DateTime<Utc>,
+    pub checked_out_to: UserReferenceDTO,
+}
