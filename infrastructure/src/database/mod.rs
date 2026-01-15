@@ -1,7 +1,5 @@
 use domain::shared::error::PersistenceError;
-use sea_orm::{
-    ConnectOptions, Database, DatabaseConnection, DatabaseTransaction, DbErr, TransactionTrait,
-};
+use sea_orm::{ConnectOptions, Database, DatabaseConnection, DbErr};
 
 use crate::config::DatabaseConfig;
 
@@ -34,10 +32,6 @@ impl ConnectionPool {
     pub async fn new(config: &DatabaseConfig) -> Result<Self, sea_orm::DbErr> {
         let options: ConnectOptions = config.into();
         Ok(Self(Database::connect(options).await?))
-    }
-
-    pub async fn begin_transaction(&self) -> Result<DatabaseTransaction, sea_orm::DbErr> {
-        self.0.begin().await
     }
 }
 
