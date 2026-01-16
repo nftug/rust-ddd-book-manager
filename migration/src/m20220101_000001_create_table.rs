@@ -32,10 +32,12 @@ impl MigrationTrait for Migration {
             .create_table(
                 with_audit_columns!(
                     Authors,
-                    Table::create()
-                        .table(Authors::Table)
-                        .if_not_exists()
-                        .col(ColumnDef::new(Authors::Name).string_len(255).not_null())
+                    Table::create().table(Authors::Table).if_not_exists().col(
+                        ColumnDef::new(Authors::Name)
+                            .string_len(255)
+                            .not_null()
+                            .unique_key()
+                    )
                 )
                 .to_owned(),
             )
