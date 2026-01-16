@@ -18,7 +18,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .layer(build_trace_layer())
         .with_state(registry);
 
-    let addr = SocketAddr::from((Ipv4Addr::LOCALHOST, config.server.port));
+    let addr = SocketAddr::from((Ipv4Addr::UNSPECIFIED, config.server.port));
 
     info!("Starting server at http://{}", addr);
     info!("Environment: {:?}", config.environment);
