@@ -23,15 +23,35 @@ impl GetOrCreateActorService {
         &self,
         request: GetOrCreateUserRequestDTO,
     ) -> Result<Actor, ApplicationError> {
+        let context = AuditContext::new(&Actor::new_system(), self.clock.as_ref());
+
         if let Some(actor) = self
             .user_domain_query_service
             .find_actor_by_id(request.id.into())
             .await?
         {
-            Ok(actor)
-        } else {
-            let context = AuditContext::new(&Actor::new_system(), self.clock.as_ref());
+            // If the user info from the request is different from the existing user, update it
+            if actor.name() != request.name || actor.role() != request.role {
+                let mut user_from_request = self
+                    .user_repository
+                    .find_by_id(request.id.into())
+                    .await?
+                    .unwrap();
 
+                user_from_request.update(
+                    &context,
+                    request.name.try_into()?,
+                    request.email.try_into()?,
+                    request.role,
+                )?;
+
+                self.user_repository.save(&user_from_request).await?;
+
+                Ok(user_from_request.into_actor())
+            } else {
+                Ok(actor)
+            }
+        } else {
             let new_user = User::create_new(
                 &context,
                 request.id.into(),
@@ -42,11 +62,7 @@ impl GetOrCreateActorService {
 
             self.user_repository.save(&new_user).await?;
 
-            Ok(Actor::hydrate(
-                new_user.audit().id().into(),
-                new_user.name().into(),
-                new_user.role(),
-            ))
+            Ok(new_user.into_actor())
         }
     }
 }

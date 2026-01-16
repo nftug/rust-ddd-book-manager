@@ -18,11 +18,17 @@ impl Actor {
     pub fn raw_id(&self) -> Uuid {
         self.user.raw_id()
     }
-    pub fn user(&self) -> &UserReference {
-        &self.user
+    pub fn name(&self) -> &str {
+        self.user.name()
+    }
+    pub fn role(&self) -> UserRole {
+        self.role
     }
     pub fn is_admin(&self) -> bool {
         self.role == UserRole::Admin
+    }
+    pub fn is_system(&self) -> bool {
+        self.role == UserRole::System
     }
 
     pub fn hydrate(id: Uuid, name: String, role: UserRole) -> Self {

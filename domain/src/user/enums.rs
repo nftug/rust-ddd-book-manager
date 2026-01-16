@@ -15,6 +15,7 @@ use strum::{AsRefStr, EnumIter, EnumString};
     Serialize,
 )]
 #[serde(rename_all = "snake_case")]
+#[strum(ascii_case_insensitive)]
 pub enum UserRole {
     Admin,
     #[default]
