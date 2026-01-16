@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 use crate::{
     book::{
-        dto::{CheckoutHistoryDTO, CheckoutHistoryQueryDTO},
+        dto::{CheckoutHistoryListDTO, CheckoutHistoryQueryDTO},
         interface::BookQueryService,
     },
     shared::error::ApplicationError,
@@ -22,7 +22,7 @@ impl GetCheckoutHistoryService {
         &self,
         book_id: Uuid,
         query: CheckoutHistoryQueryDTO,
-    ) -> Result<CheckoutHistoryDTO, ApplicationError> {
+    ) -> Result<CheckoutHistoryListDTO, ApplicationError> {
         query.validate()?;
 
         self.book_query_service

@@ -25,8 +25,16 @@ impl AggregatedBookDetails {
     pub fn from_rows(rows: Vec<BookDetailsRow>) -> Option<Self> {
         Some(Self {
             row: rows.first()?.clone(),
-            authors: rows.iter().map(|r| r.author.clone()).collect(),
-            checkouts: rows.iter().filter_map(|r| r.checkout.clone()).collect(),
+            authors: rows
+                .iter()
+                .map(|r| r.author.clone())
+                .unique_by(|a| a.id)
+                .collect(),
+            checkouts: rows
+                .iter()
+                .filter_map(|r| r.checkout.clone())
+                .unique_by(|c| c.checkout_id)
+                .collect(),
         })
     }
 
@@ -81,8 +89,16 @@ impl AggregatedBookListItem {
             .into_values()
             .map(|group| AggregatedBookListItem {
                 row: group[0].clone(),
-                authors: group.iter().map(|r| r.author.clone()).collect(),
-                checkouts: group.iter().filter_map(|r| r.checkout.clone()).collect(),
+                authors: group
+                    .iter()
+                    .map(|r| r.author.clone())
+                    .unique_by(|a| a.id)
+                    .collect(),
+                checkouts: group
+                    .iter()
+                    .filter_map(|r| r.checkout.clone())
+                    .unique_by(|c| c.checkout_id)
+                    .collect(),
             })
             .collect()
     }

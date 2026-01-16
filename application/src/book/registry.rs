@@ -113,7 +113,7 @@ impl BookRegistry {
         &self,
         book_id: Uuid,
         query: CheckoutHistoryQueryDTO,
-    ) -> Result<CheckoutHistoryDTO, ApplicationError> {
+    ) -> Result<CheckoutHistoryListDTO, ApplicationError> {
         self.get_checkout_history.execute(book_id, query).await
     }
 }

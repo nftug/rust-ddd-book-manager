@@ -1,4 +1,7 @@
-use application::book::{dto::*, interface::BookQueryService};
+use application::{
+    book::{dto::*, interface::BookQueryService},
+    shared::UserReferenceDTO,
+};
 use async_trait::async_trait;
 use derive_new::new;
 use domain::{audit::Actor, auth::permission::EntityPermission, shared::error::PersistenceError};
@@ -116,7 +119,7 @@ impl BookQueryService for BookQueryServiceImpl {
         &self,
         book_id: Uuid,
         query: &CheckoutHistoryQueryDTO,
-    ) -> Result<CheckoutHistoryDTO, PersistenceError> {
+    ) -> Result<CheckoutHistoryListDTO, PersistenceError> {
         let db_query =
             book_checkouts::Entity::find().filter(book_checkouts::Column::BookId.eq(book_id));
 
@@ -129,17 +132,27 @@ impl BookQueryService for BookQueryServiceImpl {
 
         let rows = db_query
             .order_by_desc(book_checkouts::Column::CheckedOutAt)
-            .into_partial_model::<BookCheckoutRow>()
             .paginate(self.db.inner_ref(), query.limit)
             .fetch_page(query.page - 1)
             .await
             .map_err(log_db_error)?;
 
-        Ok(CheckoutHistoryDTO {
+        Ok(CheckoutHistoryListDTO {
             limit: query.limit,
             page: query.page,
             total_count,
-            items: rows.into_iter().map(|row| row.to_dto()).collect(),
+            items: rows
+                .into_iter()
+                .map(|row| BookCheckoutWithReturnDTO {
+                    checkout_id: row.checkout_id,
+                    checked_out_at: row.checked_out_at.into(),
+                    checked_out_to: UserReferenceDTO {
+                        id: row.checked_out_by_id,
+                        name: row.checked_out_by_name,
+                    },
+                    returned_at: row.returned_at.map(|dt| dt.into()),
+                })
+                .collect(),
         })
     }
 }
