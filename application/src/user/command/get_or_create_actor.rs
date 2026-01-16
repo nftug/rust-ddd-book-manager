@@ -31,7 +31,7 @@ impl GetOrCreateActorService {
             .await?
         {
             // If the user info from the request is different from the existing user, update it
-            if actor.name() != request.name || actor.role() != request.role {
+            if actor.name() != request.name || actor.role() != request.role.into() {
                 let mut user_from_request = self
                     .user_repository
                     .find_by_id(request.id.into())
@@ -42,7 +42,7 @@ impl GetOrCreateActorService {
                     &context,
                     request.name.try_into()?,
                     request.email.try_into()?,
-                    request.role,
+                    request.role.into(),
                 )?;
 
                 self.user_repository.save(&user_from_request).await?;
@@ -57,7 +57,7 @@ impl GetOrCreateActorService {
                 request.id.into(),
                 request.name.try_into()?,
                 request.email.try_into()?,
-                request.role,
+                request.role.into(),
             )?;
 
             self.user_repository.save(&new_user).await?;

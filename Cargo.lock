@@ -95,7 +95,7 @@ dependencies = [
 
 [[package]]
 name = "api"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "application",
  "async-trait",
@@ -117,12 +117,14 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "utoipa",
+ "utoipa-axum",
+ "utoipa-redoc",
  "uuid",
 ]
 
 [[package]]
 name = "application"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "async-trait",
  "chrono",
@@ -134,6 +136,7 @@ dependencies = [
  "strum 0.27.2",
  "thiserror",
  "tracing",
+ "utoipa",
  "uuid",
 ]
 
@@ -836,7 +839,7 @@ dependencies = [
 
 [[package]]
 name = "domain"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1580,7 +1583,7 @@ dependencies = [
 
 [[package]]
 name = "infrastructure"
-version = "0.0.0"
+version = "0.1.0"
 dependencies = [
  "application",
  "async-trait",
@@ -1835,7 +1838,7 @@ version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7957b9740744892f114936ab4a57b3f487491bbeafaf8083688b16841a4240e5"
 dependencies = [
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2017,6 +2020,12 @@ dependencies = [
  "smallvec",
  "windows-link",
 ]
+
+[[package]]
+name = "paste"
+version = "1.0.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "57c0d7b74b563b49d38dae00a0c37d4d6de9b432382b2892f0574ddcae73fd0a"
 
 [[package]]
 name = "pem"
@@ -3751,6 +3760,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "utoipa-axum"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7c25bae5bccc842449ec0c5ddc5cbb6a3a1eaeac4503895dc105a1138f8234a0"
+dependencies = [
+ "axum",
+ "paste",
+ "tower-layer",
+ "tower-service",
+ "utoipa",
+]
+
+[[package]]
 name = "utoipa-gen"
 version = "5.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3761,6 +3783,18 @@ dependencies = [
  "regex",
  "syn 2.0.114",
  "uuid",
+]
+
+[[package]]
+name = "utoipa-redoc"
+version = "6.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6427547f6db7ec006cbbef95f7565952a16f362e298b416d2d497d9706fef72d"
+dependencies = [
+ "axum",
+ "serde",
+ "serde_json",
+ "utoipa",
 ]
 
 [[package]]

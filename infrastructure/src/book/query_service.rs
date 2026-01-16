@@ -84,7 +84,7 @@ impl BookQueryService for BookQueryServiceImpl {
         let book_ids: Vec<Uuid> = id_db_query
             .order_by_desc(books::Column::CreatedAt)
             .into_tuple()
-            .paginate(self.db.inner_ref(), query.limit)
+            .paginate(self.db.inner_ref(), query.page_size)
             .fetch_page(query.page - 1)
             .await
             .map_err(log_db_error)?;
@@ -102,7 +102,7 @@ impl BookQueryService for BookQueryServiceImpl {
             .map_err(log_db_error)?;
 
         Ok(BookListResponseDTO {
-            limit: query.limit,
+            page_size: query.page_size,
             page: query.page,
             total_count,
             items: AggregatedBookListItem::from_rows(rows)
@@ -132,13 +132,13 @@ impl BookQueryService for BookQueryServiceImpl {
 
         let rows = db_query
             .order_by_desc(book_checkouts::Column::CheckedOutAt)
-            .paginate(self.db.inner_ref(), query.limit)
+            .paginate(self.db.inner_ref(), query.page_size)
             .fetch_page(query.page - 1)
             .await
             .map_err(log_db_error)?;
 
         Ok(CheckoutHistoryListDTO {
-            limit: query.limit,
+            page_size: query.page_size,
             page: query.page,
             total_count,
             items: rows

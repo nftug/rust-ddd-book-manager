@@ -9,6 +9,7 @@ use crate::{
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct BookDetailsDTO {
     pub id: Uuid,
     pub title: String,
@@ -22,6 +23,7 @@ pub struct BookDetailsDTO {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct BookCheckoutDTO {
     pub checkout_id: Uuid,
     pub checked_out_at: DateTime<Utc>,
@@ -30,6 +32,7 @@ pub struct BookCheckoutDTO {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct BookListItemDTO {
     pub id: Uuid,
     pub title: String,
@@ -43,6 +46,7 @@ pub type BookListResponseDTO = PaginationDTO<BookListItemDTO>;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct BookCheckoutWithReturnDTO {
     pub checkout_id: Uuid,
     pub checked_out_at: DateTime<Utc>,

@@ -1,0 +1,43 @@
+#[cfg(debug_assertions)]
+#[derive(utoipa::OpenApi)]
+#[openapi(
+    paths(
+        crate::router::book::handlers::create_book,
+        crate::router::book::handlers::get_book_details,
+        crate::router::book::handlers::get_book_list,
+        crate::router::book::handlers::update_book,
+        crate::router::book::handlers::delete_book,
+        crate::router::book::handlers::checkout_book,
+        crate::router::book::handlers::return_book,
+        crate::router::book::handlers::get_checkout_history,
+        crate::router::user::handlers::get_me_details,
+    ),
+    components(
+        schemas(
+            application::shared::AuditDTO,
+            application::shared::AuditSummaryDTO,
+            application::shared::UserReferenceDTO,
+            application::shared::PermissionDTO,
+            application::shared::EntityCreationDTO,
+            application::user::dto::UserRoleDTO,
+            application::user::dto::GetOrCreateUserRequestDTO,
+            application::user::dto::UserDetailsDTO,
+            application::author::dto::AuthorSummaryDTO,
+            application::book::dto::CreateBookRequestDTO,
+            application::book::dto::UpdateBookRequestDTO,
+            application::book::dto::BookListQueryDTO,
+            application::book::dto::CheckoutHistoryQueryDTO,
+            application::book::dto::BookDetailsDTO,
+            application::book::dto::BookCheckoutDTO,
+            application::book::dto::BookListItemDTO,
+            application::book::dto::BookListResponseDTO,
+            application::book::dto::BookCheckoutWithReturnDTO,
+            application::book::dto::CheckoutHistoryListDTO,
+        )
+    ),
+    tags(
+        (name = "Books", description = "Book management endpoints"),
+        (name = "Users", description = "User management endpoints"),
+    )
+)]
+pub struct ApiDoc;

@@ -4,10 +4,11 @@ use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Validate)]
 #[serde(rename_all = "snake_case")]
+#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct BookListQueryDTO {
     #[garde(range(min = 1))]
-    #[serde(default = "default_limit")]
-    pub limit: u64,
+    #[serde(default = "default_page_size")]
+    pub page_size: u64,
     #[garde(range(min = 1))]
     #[serde(default = "default_page")]
     pub page: u64,
@@ -21,16 +22,17 @@ pub struct BookListQueryDTO {
 
 #[derive(Debug, Deserialize, Validate)]
 #[serde(rename_all = "snake_case")]
+#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct CheckoutHistoryQueryDTO {
     #[garde(range(min = 1))]
-    #[serde(default = "default_limit")]
-    pub limit: u64,
+    #[serde(default = "default_page_size")]
+    pub page_size: u64,
     #[garde(range(min = 1))]
     #[serde(default = "default_page")]
     pub page: u64,
 }
 
-const fn default_limit() -> u64 {
+const fn default_page_size() -> u64 {
     10
 }
 

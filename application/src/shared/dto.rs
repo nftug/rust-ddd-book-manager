@@ -5,6 +5,7 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct AuditDTO {
     pub created_by: UserReferenceDTO,
     pub created_at: DateTime<Utc>,
@@ -15,6 +16,7 @@ pub struct AuditDTO {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct AuditSummaryDTO {
     pub created_at: DateTime<Utc>,
     pub updated_at: Option<DateTime<Utc>>,
@@ -23,6 +25,7 @@ pub struct AuditSummaryDTO {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct UserReferenceDTO {
     pub id: Uuid,
     pub name: String,
@@ -30,6 +33,7 @@ pub struct UserReferenceDTO {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct PermissionDTO {
     pub can_update: bool,
     pub can_delete: bool,
@@ -46,15 +50,17 @@ impl From<&dyn Permission> for PermissionDTO {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct PaginationDTO<T> {
-    pub limit: u64,
     pub page: u64,
+    pub page_size: u64,
     pub total_count: u64,
     pub items: Vec<T>,
 }
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct EntityCreationDTO {
     pub id: Uuid,
 }

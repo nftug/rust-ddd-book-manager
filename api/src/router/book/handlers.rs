@@ -1,4 +1,6 @@
 use application::book::dto::*;
+#[allow(unused)]
+use application::shared::*;
 use axum::{
     Json,
     extract::{Path, Query, State},
@@ -10,6 +12,26 @@ use uuid::Uuid;
 
 use crate::{auth::OidcUserInfo, error::ApiError, registry::AppRegistry};
 
+#[cfg_attr(
+    debug_assertions,
+    utoipa::path(
+        get,
+        path = "/books/{book_id}",
+        params(
+            ("book_id" = Uuid, Path, description = "The UUID of the book to retrieve"),
+        ),
+        responses(
+            (status = 200, description = "Book details retrieved successfully", body = BookDetailsDTO),
+            (status = 401, description = "Unauthorized"),
+            (status = 403, description = "Forbidden"),
+            (status = 404, description = "Book not found"),
+            (status = 500, description = "Internal server error"),
+        ),
+        security(
+            ("bearerAuth" = [])
+        )
+    )
+)]
 #[tracing::instrument(
     skip(registry, user_info),
     fields(
@@ -17,7 +39,7 @@ use crate::{auth::OidcUserInfo, error::ApiError, registry::AppRegistry};
     ),
     err
 )]
-pub async fn get_book_details_handler(
+pub async fn get_book_details(
     user_info: Option<OidcUserInfo>,
     State(registry): State<AppRegistry>,
     Path(book_id): Path<Uuid>,
@@ -32,6 +54,28 @@ pub async fn get_book_details_handler(
     Ok(Json(response))
 }
 
+#[cfg_attr(
+    debug_assertions,
+    utoipa::path(
+        get,
+        path = "/books",
+        params(
+            ("owner_id" = Option<Uuid>, Query, description = "Filter books by owner UUID"),
+            ("checked_out" = Option<bool>, Query, description = "Filter books by checked out status"),
+            ("page" = Option<u32>, Query, description = "Page number for pagination"),
+            ("page_size" = Option<u32>, Query, description = "Number of items per page for pagination"),
+        ),
+        responses(
+            (status = 200, description = "Book list retrieved successfully", body = PaginationDTO<BookListItemDTO>),
+            (status = 401, description = "Unauthorized"),
+            (status = 403, description = "Forbidden"),
+            (status = 500, description = "Internal server error"),
+        ),
+        security(
+            ("bearerAuth" = [])
+        )
+    )
+)]
 #[tracing::instrument(
     skip(registry, user_info),
     fields(
@@ -39,7 +83,7 @@ pub async fn get_book_details_handler(
     ),
     err
 )]
-pub async fn get_book_list_handler(
+pub async fn get_book_list(
     State(registry): State<AppRegistry>,
     user_info: Option<OidcUserInfo>,
     Query(query): Query<BookListQueryDTO>,
@@ -54,6 +98,24 @@ pub async fn get_book_list_handler(
     Ok(Json(response))
 }
 
+#[cfg_attr(
+    debug_assertions,
+    utoipa::path(
+        post,
+        path = "/books",
+        request_body = CreateBookRequestDTO,
+        responses(
+            (status = 201, description = "Book created successfully", body = EntityCreationDTO),
+            (status = 400, description = "Invalid request"),
+            (status = 401, description = "Unauthorized"),
+            (status = 403, description = "Forbidden"),
+            (status = 500, description = "Internal server error"),
+            ),
+        security(
+            ("bearerAuth" = [])
+        )
+    )
+)]
 #[tracing::instrument(
     skip(registry, user_info),
     fields(
@@ -61,7 +123,7 @@ pub async fn get_book_list_handler(
     ),
     err
 )]
-pub async fn create_book_handler(
+pub async fn create_book(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
     Json(request): Json<CreateBookRequestDTO>,
@@ -76,6 +138,28 @@ pub async fn create_book_handler(
     Ok((StatusCode::CREATED, Json(response)))
 }
 
+#[cfg_attr(
+    debug_assertions,
+    utoipa::path(
+        put,
+        path = "/books/{book_id}",
+        params(
+            ("book_id" = Uuid, Path, description = "The UUID of the book to update"),
+        ),
+        request_body = UpdateBookRequestDTO,
+        responses(
+            (status = 204, description = "Book updated successfully"),
+            (status = 400, description = "Invalid request"),
+            (status = 401, description = "Unauthorized"),
+            (status = 403, description = "Forbidden"),
+            (status = 404, description = "Book not found"),
+            (status = 500, description = "Internal server error"),
+        ),
+        security(
+            ("bearerAuth" = [])
+        )
+    )
+)]
 #[tracing::instrument(
     skip(registry, user_info),
     fields(
@@ -83,7 +167,7 @@ pub async fn create_book_handler(
     ),
     err
 )]
-pub async fn update_book_handler(
+pub async fn update_book(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
     Path(book_id): Path<Uuid>,
@@ -99,6 +183,28 @@ pub async fn update_book_handler(
     Ok(StatusCode::NO_CONTENT)
 }
 
+#[cfg_attr(
+    debug_assertions,
+    utoipa::path(
+        put,
+        path = "/books/{book_id}",
+        params(
+            ("book_id" = Uuid, Path, description = "The UUID of the book to update"),
+        ),
+        request_body = UpdateBookRequestDTO,
+        responses(
+            (status = 204, description = "Book updated successfully"),
+            (status = 400, description = "Invalid request"),
+            (status = 401, description = "Unauthorized"),
+            (status = 403, description = "Forbidden"),
+            (status = 404, description = "Book not found"),
+            (status = 500, description = "Internal server error"),
+        ),
+        security(
+            ("bearerAuth" = [])
+        )
+    )
+)]
 #[tracing::instrument(
     skip(registry, user_info),
     fields(
@@ -106,7 +212,7 @@ pub async fn update_book_handler(
     ),
     err
 )]
-pub async fn delete_book_handler(
+pub async fn delete_book(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
     Path(book_id): Path<Uuid>,
@@ -121,6 +227,28 @@ pub async fn delete_book_handler(
     Ok(StatusCode::NO_CONTENT)
 }
 
+#[cfg_attr(
+    debug_assertions,
+    utoipa::path(
+        get,
+        path = "/books/{book_id}/checkouts",
+        params(
+            ("book_id" = Uuid, Path, description = "The UUID of the book to retrieve checkout history for"),
+            ("page" = Option<u32>, Query, description = "Page number for pagination"),
+            ("page_size" = Option<u32>, Query, description = "Number of items per page for pagination"),
+        ),
+        responses(
+            (status = 200, description = "Checkout history retrieved successfully", body = CheckoutHistoryListDTO),
+            (status = 401, description = "Unauthorized"),
+            (status = 403, description = "Forbidden"),
+            (status = 404, description = "Book not found"),
+            (status = 500, description = "Internal server error"),
+        ),
+        security(
+            ("bearerAuth" = [])
+        )
+    )
+)]
 #[tracing::instrument(
     skip(registry, user_info),
     fields(
@@ -128,7 +256,7 @@ pub async fn delete_book_handler(
     ),
     err
 )]
-pub async fn get_checkout_history_handler(
+pub async fn get_checkout_history(
     State(registry): State<AppRegistry>,
     Path(book_id): Path<Uuid>,
     Query(query): Query<CheckoutHistoryQueryDTO>,
@@ -144,6 +272,27 @@ pub async fn get_checkout_history_handler(
     Ok(Json(response))
 }
 
+#[cfg_attr(
+    debug_assertions,
+    utoipa::path(
+        post,
+        path = "/books/{book_id}/checkout",
+        params(
+            ("book_id" = Uuid, Path, description = "The UUID of the book to checkout"),
+        ),
+        responses(
+            (status = 204, description = "Book checked out successfully"),
+            (status = 400, description = "Invalid request"),
+            (status = 401, description = "Unauthorized"),
+            (status = 403, description = "Forbidden"),
+            (status = 404, description = "Book not found"),
+            (status = 500, description = "Internal server error"),
+        ),
+        security(
+            ("bearerAuth" = [])
+        )
+    )
+)]
 #[tracing::instrument(
     skip(registry, user_info),
     fields(
@@ -151,7 +300,7 @@ pub async fn get_checkout_history_handler(
     ),
     err
 )]
-pub async fn checkout_book_handler(
+pub async fn checkout_book(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
     Path(book_id): Path<Uuid>,
@@ -166,6 +315,27 @@ pub async fn checkout_book_handler(
     Ok(StatusCode::NO_CONTENT)
 }
 
+#[cfg_attr(
+    debug_assertions,
+    utoipa::path(
+        post,
+        path = "/books/{book_id}/return",
+        params(
+            ("book_id" = Uuid, Path, description = "The UUID of the book to return"),
+        ),
+        responses(
+            (status = 204, description = "Book returned successfully"),
+            (status = 400, description = "Invalid request"),
+            (status = 401, description = "Unauthorized"),
+            (status = 403, description = "Forbidden"),
+            (status = 404, description = "Book not found"),
+            (status = 500, description = "Internal server error"),
+        ),
+        security(
+            ("bearerAuth" = [])
+        )
+    )
+)]
 #[tracing::instrument(
     skip(registry, user_info),
     fields(
@@ -173,7 +343,7 @@ pub async fn checkout_book_handler(
     ),
     err
 )]
-pub async fn return_book_handler(
+pub async fn return_book(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
     Path(book_id): Path<Uuid>,

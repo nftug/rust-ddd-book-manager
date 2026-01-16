@@ -3,6 +3,7 @@ name = "application"
 edition.workspace = true
 license.workspace = true
 publish.workspace = true
+version.workspace = true
 
 [dependencies]
 domain.workspace = true
@@ -18,3 +19,4 @@ serde.workspace = true
 async-trait.workspace = true
 
 garde = { version = "0.22.1", features = ["derive"] }
+utoipa = { workspace = true, features = ["uuid", "chrono"] }

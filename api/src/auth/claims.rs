@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
-use application::user::dto::GetOrCreateUserRequestDTO;
-use domain::user::enums::UserRole;
+use application::user::dto::{GetOrCreateUserRequestDTO, UserRoleDTO};
 use serde::Deserialize;
 use uuid::Uuid;
 
@@ -61,18 +60,18 @@ impl TryFrom<OidcUserInfo> for GetOrCreateUserRequestDTO {
         let role = if user_info
             .roles
             .iter()
-            .any(|v| UserRole::from_str(v).is_ok_and(|r| r == UserRole::Admin))
+            .any(|v| UserRoleDTO::from_str(v).is_ok_and(|r| r == UserRoleDTO::Admin))
         {
-            domain::user::enums::UserRole::Admin
+            UserRoleDTO::Admin
         } else {
-            domain::user::enums::UserRole::Regular
+            UserRoleDTO::Regular
         };
 
-        Ok(GetOrCreateUserRequestDTO::new(
-            user_info.id,
-            full_name,
+        Ok(GetOrCreateUserRequestDTO {
+            id: user_info.id,
+            name: full_name,
             email,
             role,
-        ))
+        })
     }
 }
