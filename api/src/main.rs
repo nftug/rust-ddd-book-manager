@@ -9,7 +9,7 @@ use tracing::info;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let registry = AppRegistry::new().await?;
+    let registry = AppRegistry::build_runtime().await?;
     let config = registry.config();
 
     init_logger(&config)?;
