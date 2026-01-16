@@ -132,6 +132,6 @@ impl Book {
     }
 
     fn permission_to_update(&self, actor: &Actor) -> EntityPermission {
-        EntityPermission::new(Some(actor), self.audit.created_by().id())
+        EntityPermission::new(Some(actor), self.owner.id())
     }
 }
