@@ -49,7 +49,7 @@ pub struct ServerConfig {
 impl ServerConfig {
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
         Ok(ServerConfig {
-            port: env::var("PORT")?.parse()?,
+            port: env::var("PORT")?.parse().unwrap_or(8080),
         })
     }
 }
@@ -66,7 +66,7 @@ impl DatabaseConfig {
     pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
         Ok(DatabaseConfig {
             host: env::var("DATABASE_HOST")?,
-            port: env::var("DATABASE_PORT")?.parse()?,
+            port: env::var("DATABASE_PORT")?.parse().unwrap_or(5432),
             username: env::var("DATABASE_USERNAME")?,
             password: env::var("DATABASE_PASSWORD")?,
             database: env::var("DATABASE_NAME")?,

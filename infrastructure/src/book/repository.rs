@@ -107,15 +107,17 @@ impl BookRepository for BookRepositoryImpl {
             })
             .collect::<Vec<_>>();
 
-        book_checkouts::Entity::delete_many()
-            .filter(book_checkouts::Column::BookId.eq(book.audit().raw_id()))
-            .exec(&txn)
-            .await
-            .map_err(log_db_error)?;
-        book_checkouts::Entity::insert_many(book_checkouts)
-            .exec(&txn)
-            .await
-            .map_err(log_db_error)?;
+        if !book_checkouts.is_empty() {
+            book_checkouts::Entity::delete_many()
+                .filter(book_checkouts::Column::BookId.eq(book.audit().raw_id()))
+                .exec(&txn)
+                .await
+                .map_err(log_db_error)?;
+            book_checkouts::Entity::insert_many(book_checkouts)
+                .exec(&txn)
+                .await
+                .map_err(log_db_error)?;
+        }
 
         // Commit transaction
         txn.commit().await.map_err(log_db_error)?;

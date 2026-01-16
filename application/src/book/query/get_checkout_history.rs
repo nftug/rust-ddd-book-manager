@@ -1,12 +1,13 @@
 use std::sync::Arc;
 
 use derive_new::new;
+use domain::audit::Actor;
 use garde::Validate;
 use uuid::Uuid;
 
 use crate::{
     book::{
-        dto::{CheckoutHistoryDTO, CheckoutHistoryQueryDTO},
+        dto::{CheckoutHistoryListDTO, CheckoutHistoryQueryDTO},
         interface::BookQueryService,
     },
     shared::error::ApplicationError,
@@ -20,9 +21,14 @@ pub struct GetCheckoutHistoryService {
 impl GetCheckoutHistoryService {
     pub async fn execute(
         &self,
+        actor: &Actor,
         book_id: Uuid,
         query: CheckoutHistoryQueryDTO,
-    ) -> Result<CheckoutHistoryDTO, ApplicationError> {
+    ) -> Result<CheckoutHistoryListDTO, ApplicationError> {
+        if !actor.is_admin() {
+            return Err(ApplicationError::Forbidden);
+        }
+
         query.validate()?;
 
         self.book_query_service

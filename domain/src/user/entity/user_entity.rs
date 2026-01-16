@@ -1,6 +1,6 @@
 use crate::{
-    audit::{AuditContext, EntityAudit},
-    auth::permission::{EntityPermission, PassThroughPermission},
+    audit::{Actor, AuditContext, EntityAudit},
+    auth::permission::{EntityPermission, PassThroughPermission, Permission},
     shared::error::DomainError,
     user::{enums::*, values::*},
 };
@@ -65,13 +65,25 @@ impl User {
         email: UserEmail,
         role: UserRole,
     ) -> Result<(), DomainError> {
-        let permission = EntityPermission::new(Some(context.actor()), self.audit.id());
+        let permission: &dyn Permission = if context.actor().is_system() {
+            &PassThroughPermission::new()
+        } else {
+            &EntityPermission::new(Some(context.actor()), self.audit.id())
+        };
 
-        self.audit.mark_updated(context, &permission)?;
+        self.audit.mark_updated(context, permission)?;
         self.name = name;
         self.email = email;
         self.role = role;
 
         Ok(())
+    }
+
+    pub fn into_actor(&self) -> Actor {
+        Actor::hydrate(
+            self.audit.id().into(),
+            self.name.raw().to_string(),
+            self.role,
+        )
     }
 }

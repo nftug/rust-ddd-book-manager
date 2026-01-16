@@ -14,7 +14,7 @@ DATABASE_HOST = "localhost"
 DATABASE_PORT = "${DATABASE_PORT_OUTER}"
 DATABASE_URL = "postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}?user=${DATABASE_USERNAME}&password=${DATABASE_PASSWORD}"
 KEYCLOAK_PORT_OUTER = 8081
-OIDC_AUTHORITY = "http://localhost:${KEYCLOAK_PORT_OUTER}/realms/book-manager"
+OIDC_AUTHORITY = "http://localhost:${KEYCLOAK_PORT_OUTER}/realms/master"
 OIDC_CLIENT_ID = "book-manager"
 
 [tasks.before-build]
@@ -55,7 +55,7 @@ args = [
 extend = "set-env-local"
 dependencies = ["before-build"]
 command = "cargo"
-args = ["run", "-p", "api", "${@}"]
+args = ["watch", "-x", "run -p api", "${@}"]
 
 [tasks.run-release]
 extend = "set-env-local"

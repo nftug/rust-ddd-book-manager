@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use domain::{audit::Actor, shared::error::PersistenceError};
 use uuid::Uuid;
 
-use crate::{book::dto::*, shared::PaginationDTO};
+use crate::book::dto::*;
 
 #[async_trait]
 pub trait BookQueryService: Send + Sync {
@@ -22,5 +22,5 @@ pub trait BookQueryService: Send + Sync {
         &self,
         book_id: Uuid,
         query: &CheckoutHistoryQueryDTO,
-    ) -> Result<PaginationDTO<CheckoutDTO>, PersistenceError>;
+    ) -> Result<CheckoutHistoryListDTO, PersistenceError>;
 }
