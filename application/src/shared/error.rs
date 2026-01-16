@@ -5,6 +5,8 @@ use thiserror::Error;
 pub enum ApplicationError {
     #[error("{0}")]
     DomainError(#[from] DomainError),
+    #[error("Validation error: {0}")]
+    ValidationError(#[from] garde::Report),
     #[error("Persistence error: {0}")]
     PersistenceError(#[from] PersistenceError),
     #[error("Not found")]

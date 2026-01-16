@@ -2,7 +2,9 @@ use application::book::{dto::*, interface::BookQueryService};
 use async_trait::async_trait;
 use derive_new::new;
 use domain::{audit::Actor, auth::permission::EntityPermission, shared::error::PersistenceError};
-use sea_orm::{ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect};
+use sea_orm::{
+    ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, QueryTrait,
+};
 use uuid::Uuid;
 
 use crate::database::{
@@ -45,48 +47,66 @@ impl BookQueryService for BookQueryServiceImpl {
         actor: Option<&Actor>,
         query: &BookListQueryDTO,
     ) -> Result<BookListResponseDTO, PersistenceError> {
-        let get_query = || {
-            let mut select = books::Entity::find()
-                .inner_join(authors::Entity)
-                .inner_join(users::Entity)
-                .left_join(book_checkouts::Entity);
-
-            if let Some(owner_id) = query.owner_id {
-                select = select.filter(users::Column::Id.eq(owner_id));
-            }
-            if let Some(checked_out) = query.checked_out {
-                if checked_out {
-                    select = select.filter(book_checkouts::Column::ReturnedAt.is_null());
-                } else {
-                    // Never checked out books or already returned books
-                    select = select.filter(
-                        book_checkouts::Column::CheckoutId
-                            .is_null()
-                            .or(book_checkouts::Column::ReturnedAt.is_not_null()),
-                    );
-                }
-            }
-            if let Some(checked_out_to_id) = query.checked_out_to_id {
-                select = select
-                    .filter(book_checkouts::Column::CheckedOutById.eq(checked_out_to_id))
-                    .filter(book_checkouts::Column::ReturnedAt.is_null());
-            }
-
-            select
-        };
-
-        let total_count = get_query()
+        let mut id_db_query = books::Entity::find()
             .select_only()
+            .column(books::Column::Id);
+
+        // Apply filters
+        if let Some(owner_id) = query.owner_id {
+            id_db_query = id_db_query.filter(books::Column::OwnerId.eq(owner_id));
+        }
+        if let Some(checked_out) = query.checked_out {
+            let active_checkouts = book_checkouts::Entity::find()
+                .select_only()
+                .column(book_checkouts::Column::BookId)
+                .filter(book_checkouts::Column::ReturnedAt.is_null());
+
+            if checked_out {
+                id_db_query = id_db_query
+                    .filter(books::Column::Id.in_subquery(active_checkouts.into_query()));
+            } else {
+                id_db_query = id_db_query
+                    .filter(books::Column::Id.not_in_subquery(active_checkouts.into_query()));
+            }
+        }
+        if let Some(checked_out_to_id) = query.checked_out_to_id {
+            let checkouts_for_user = book_checkouts::Entity::find()
+                .select_only()
+                .column(book_checkouts::Column::BookId)
+                .filter(book_checkouts::Column::CheckedOutById.eq(checked_out_to_id))
+                .filter(book_checkouts::Column::ReturnedAt.is_null());
+
+            id_db_query =
+                id_db_query.filter(books::Column::Id.in_subquery(checkouts_for_user.into_query()));
+        }
+
+        // Get total count before pagination
+        let total_count = id_db_query
+            .clone()
             .count(self.db.inner_ref())
             .await
             .map_err(log_db_error)?;
 
-        let rows = get_query()
+        // Apply pagination
+        let book_ids: Vec<Uuid> = id_db_query
             .order_by_desc(books::Column::CreatedAt)
-            .order_by_asc(book_authors::Column::OrderIndex)
-            .into_partial_model::<BookListItemRow>()
+            .order_by_desc(books::Column::Id) // Ensure consistent order when paginating
+            .into_tuple()
             .paginate(self.db.inner_ref(), query.limit)
             .fetch_page(query.page - 1)
+            .await
+            .map_err(log_db_error)?;
+
+        let rows = books::Entity::find()
+            .inner_join(authors::Entity)
+            .inner_join(users::Entity)
+            .left_join(book_checkouts::Entity)
+            .filter(books::Column::Id.is_in(book_ids))
+            .order_by_desc(books::Column::CreatedAt)
+            .order_by_desc(books::Column::Id) // Ensure consistent order when paginating
+            .order_by_asc(book_authors::Column::OrderIndex)
+            .into_partial_model::<BookListItemRow>()
+            .all(self.db.inner_ref())
             .await
             .map_err(log_db_error)?;
 
@@ -109,16 +129,17 @@ impl BookQueryService for BookQueryServiceImpl {
         book_id: Uuid,
         query: &CheckoutHistoryQueryDTO,
     ) -> Result<CheckoutHistoryDTO, PersistenceError> {
-        let get_query =
-            || book_checkouts::Entity::find().filter(book_checkouts::Column::BookId.eq(book_id));
+        let db_query =
+            book_checkouts::Entity::find().filter(book_checkouts::Column::BookId.eq(book_id));
 
-        let total_count = get_query()
+        let total_count = db_query
+            .clone()
             .select_only()
             .count(self.db.inner_ref())
             .await
             .map_err(log_db_error)?;
 
-        let rows = get_query()
+        let rows = db_query
             .order_by_desc(book_checkouts::Column::CheckedOutAt)
             .into_partial_model::<BookCheckoutRow>()
             .paginate(self.db.inner_ref(), query.limit)
