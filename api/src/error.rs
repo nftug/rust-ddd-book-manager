@@ -28,6 +28,7 @@ impl From<ApplicationError> for ApiError {
                 DomainError::Forbidden => ApiError::Forbidden,
                 DomainError::ValidationError(msg) => ApiError::BadRequest(msg.to_string()),
             },
+            ApplicationError::ValidationError(err) => ApiError::BadRequest(err.to_string()),
             ApplicationError::PersistenceError(_) => ApiError::InternalError(err),
             ApplicationError::NotFound => ApiError::NotFound,
             ApplicationError::Forbidden => ApiError::Forbidden,

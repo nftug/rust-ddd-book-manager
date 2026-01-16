@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use derive_new::new;
 use domain::audit::Actor;
+use garde::Validate;
 
 use crate::{
     book::{
@@ -22,6 +23,8 @@ impl GetBookListService {
         actor: Option<&Actor>,
         query: BookListQueryDTO,
     ) -> Result<BookListResponseDTO, ApplicationError> {
+        query.validate()?;
+
         self.book_query_service
             .get_book_list(actor, &query)
             .await

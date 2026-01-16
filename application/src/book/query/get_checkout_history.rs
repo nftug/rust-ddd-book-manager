@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use derive_new::new;
+use garde::Validate;
 use uuid::Uuid;
 
 use crate::{
@@ -22,6 +23,8 @@ impl GetCheckoutHistoryService {
         book_id: Uuid,
         query: CheckoutHistoryQueryDTO,
     ) -> Result<CheckoutHistoryDTO, ApplicationError> {
+        query.validate()?;
+
         self.book_query_service
             .get_checkout_history(book_id, &query)
             .await
