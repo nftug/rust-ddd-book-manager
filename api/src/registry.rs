@@ -3,7 +3,7 @@ use std::sync::Arc;
 use application::{
     author::registry::AuthorServiceRegistry, book::BookRegistry, user::UserRegistry,
 };
-use domain::audit::{Actor, clock::SystemClock};
+use domain::audit::{Actor, Clock, clock::SystemClock};
 use infrastructure::{
     author::{AuthorDomainQueryServiceImpl, AuthorRepositoryImpl},
     book::{BookQueryServiceImpl, BookRepositoryImpl},
@@ -22,10 +22,13 @@ pub struct AppRegistry {
 }
 
 impl AppRegistry {
-    pub async fn new() -> Result<Self, Box<dyn std::error::Error>> {
-        let config = AppConfig::from_env()?;
+    pub async fn build(
+        config: AppConfig,
+        clock: impl Clock + 'static,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        let config = Arc::new(config);
+        let clock = Arc::new(clock);
         let db = ConnectionPool::new(&config.database).await?;
-        let clock = Arc::new(SystemClock {});
 
         let book_repository = Arc::new(BookRepositoryImpl::new(db.clone()));
         let book_query_service = Arc::new(BookQueryServiceImpl::new(db.clone()));
@@ -55,10 +58,16 @@ impl AppRegistry {
         );
 
         Ok(AppRegistry {
-            config: Arc::new(config),
+            config,
             book_registry: Arc::new(book_registry),
             user_registry: Arc::new(user_registry),
         })
+    }
+
+    pub async fn build_runtime() -> Result<Self, Box<dyn std::error::Error>> {
+        let config = AppConfig::from_env()?;
+        let clock = SystemClock {};
+        Self::build(config, clock).await
     }
 
     pub async fn prepare_actor(&self, user_info: OidcUserInfo) -> Result<Actor, ApiError> {

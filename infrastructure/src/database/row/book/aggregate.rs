@@ -26,7 +26,7 @@ impl AggregatedBookDetails {
         Some(Self {
             row: rows.first()?.clone(),
             authors: rows.iter().map(|r| r.author.clone()).collect(),
-            checkouts: rows.iter().map(|r| r.checkout.clone()).collect(),
+            checkouts: rows.iter().filter_map(|r| r.checkout.clone()).collect(),
         })
     }
 
@@ -82,7 +82,7 @@ impl AggregatedBookListItem {
             .map(|group| AggregatedBookListItem {
                 row: group[0].clone(),
                 authors: group.iter().map(|r| r.author.clone()).collect(),
-                checkouts: group.iter().map(|r| r.checkout.clone()).collect(),
+                checkouts: group.iter().filter_map(|r| r.checkout.clone()).collect(),
             })
             .collect()
     }

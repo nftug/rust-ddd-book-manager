@@ -23,7 +23,7 @@ pub struct BookDetailsRow {
     #[sea_orm(nested)]
     pub user: UserReferenceRow,
     #[sea_orm(nested)]
-    pub checkout: BookCheckoutRow,
+    pub checkout: Option<BookCheckoutRow>,
 }
 
 #[derive(DerivePartialModel, FromQueryResult, Clone)]
@@ -39,7 +39,7 @@ pub struct BookListItemRow {
     #[sea_orm(nested)]
     pub user: UserReferenceRow,
     #[sea_orm(nested)]
-    pub checkout: BookCheckoutRow,
+    pub checkout: Option<BookCheckoutRow>,
 }
 
 #[derive(DerivePartialModel, FromQueryResult, Clone)]

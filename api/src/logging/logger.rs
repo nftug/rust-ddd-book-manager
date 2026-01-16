@@ -15,11 +15,7 @@ pub fn init_logger(config: &AppConfig) -> Result<(), Box<dyn std::error::Error>>
 
     let env_filter = EnvFilter::try_from_default_env().unwrap_or(log_level.into());
 
-    let subscriber = tracing_subscriber::fmt::layer()
-        .with_file(true)
-        .with_line_number(true)
-        .with_target(false)
-        .pretty();
+    let subscriber = tracing_subscriber::fmt::layer();
 
     tracing_subscriber::registry()
         .with(env_filter)
