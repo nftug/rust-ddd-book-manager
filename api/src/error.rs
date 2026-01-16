@@ -52,8 +52,6 @@ impl From<OidcAuthError> for ApiError {
 
 impl IntoResponse for ApiError {
     fn into_response(self) -> axum::response::Response {
-        tracing::error!(error = %self, "API error occurred");
-
         let (status, message) = match &self {
             ApiError::BadRequest(msg) => (StatusCode::BAD_REQUEST, Some(msg.to_string())),
             ApiError::NotFound => (StatusCode::NOT_FOUND, None),

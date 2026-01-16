@@ -10,9 +10,16 @@ use uuid::Uuid;
 
 use crate::{auth::OidcUserInfo, error::ApiError, registry::AppRegistry};
 
+#[tracing::instrument(
+    skip(registry, user_info),
+    fields(
+        user_id = ?user_info.as_ref().map(|u| u.id),
+    ),
+    err
+)]
 pub async fn get_book_details_handler(
-    State(registry): State<AppRegistry>,
     user_info: Option<OidcUserInfo>,
+    State(registry): State<AppRegistry>,
     Path(book_id): Path<Uuid>,
 ) -> Result<impl IntoResponse, ApiError> {
     let actor = registry.prepare_optional_actor(user_info).await?;
@@ -25,6 +32,13 @@ pub async fn get_book_details_handler(
     Ok(Json(response))
 }
 
+#[tracing::instrument(
+    skip(registry, user_info),
+    fields(
+        user_id = ?user_info.as_ref().map(|u| u.id),
+    ),
+    err
+)]
 pub async fn get_book_list_handler(
     State(registry): State<AppRegistry>,
     user_info: Option<OidcUserInfo>,
@@ -40,6 +54,13 @@ pub async fn get_book_list_handler(
     Ok(Json(response))
 }
 
+#[tracing::instrument(
+    skip(registry, user_info),
+    fields(
+        user_id = %user_info.id,
+    ),
+    err
+)]
 pub async fn create_book_handler(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
@@ -55,6 +76,13 @@ pub async fn create_book_handler(
     Ok((StatusCode::CREATED, Json(response)))
 }
 
+#[tracing::instrument(
+    skip(registry, user_info),
+    fields(
+        user_id = %user_info.id,
+    ),
+    err
+)]
 pub async fn update_book_handler(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
@@ -71,6 +99,13 @@ pub async fn update_book_handler(
     Ok(StatusCode::NO_CONTENT)
 }
 
+#[tracing::instrument(
+    skip(registry, user_info),
+    fields(
+        user_id = %user_info.id,
+    ),
+    err
+)]
 pub async fn delete_book_handler(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
@@ -86,6 +121,13 @@ pub async fn delete_book_handler(
     Ok(StatusCode::NO_CONTENT)
 }
 
+#[tracing::instrument(
+    skip(registry, user_info),
+    fields(
+        user_id = %user_info.id,
+    ),
+    err
+)]
 pub async fn get_checkout_history_handler(
     State(registry): State<AppRegistry>,
     Path(book_id): Path<Uuid>,
@@ -102,6 +144,13 @@ pub async fn get_checkout_history_handler(
     Ok(Json(response))
 }
 
+#[tracing::instrument(
+    skip(registry, user_info),
+    fields(
+        user_id = %user_info.id,
+    ),
+    err
+)]
 pub async fn checkout_book_handler(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
@@ -117,6 +166,13 @@ pub async fn checkout_book_handler(
     Ok(StatusCode::NO_CONTENT)
 }
 
+#[tracing::instrument(
+    skip(registry, user_info),
+    fields(
+        user_id = %user_info.id,
+    ),
+    err
+)]
 pub async fn return_book_handler(
     State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
