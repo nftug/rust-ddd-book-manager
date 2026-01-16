@@ -33,9 +33,10 @@ impl AuthorsFactoryService {
             .collect();
 
         if author_names.len() != uniq_author_names.len() {
-            return Err(
-                DomainError::ValidationError("Author names contain duplicates".into()).into(),
-            );
+            return Err(DomainError::ValidationError(
+                "Author names contain duplicates".to_string(),
+            )
+            .into());
         }
 
         let mut author_refs = self
