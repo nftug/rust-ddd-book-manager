@@ -111,9 +111,12 @@ impl BookRegistry {
 
     pub async fn get_checkout_history(
         &self,
+        actor: &Actor,
         book_id: Uuid,
         query: CheckoutHistoryQueryDTO,
     ) -> Result<CheckoutHistoryListDTO, ApplicationError> {
-        self.get_checkout_history.execute(book_id, query).await
+        self.get_checkout_history
+            .execute(actor, book_id, query)
+            .await
     }
 }

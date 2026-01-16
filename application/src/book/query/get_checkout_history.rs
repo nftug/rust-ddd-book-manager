@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use derive_new::new;
+use domain::audit::Actor;
 use garde::Validate;
 use uuid::Uuid;
 
@@ -20,9 +21,14 @@ pub struct GetCheckoutHistoryService {
 impl GetCheckoutHistoryService {
     pub async fn execute(
         &self,
+        actor: &Actor,
         book_id: Uuid,
         query: CheckoutHistoryQueryDTO,
     ) -> Result<CheckoutHistoryListDTO, ApplicationError> {
+        if !actor.is_admin() {
+            return Err(ApplicationError::Forbidden);
+        }
+
         query.validate()?;
 
         self.book_query_service

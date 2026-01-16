@@ -90,10 +90,13 @@ pub async fn get_checkout_history_handler(
     State(registry): State<AppRegistry>,
     Path(book_id): Path<Uuid>,
     Query(query): Query<CheckoutHistoryQueryDTO>,
+    user_info: OidcUserInfo,
 ) -> Result<impl IntoResponse, ApiError> {
+    let actor = registry.prepare_actor(user_info).await?;
+
     let response = registry
         .book_registry()
-        .get_checkout_history(book_id, query)
+        .get_checkout_history(&actor, book_id, query)
         .await?;
 
     Ok(Json(response))
