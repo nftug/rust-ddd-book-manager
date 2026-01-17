@@ -24,14 +24,14 @@ impl CreateBookService {
     pub async fn execute(
         &self,
         actor: &Actor,
-        request: CreateBookRequestDTO,
+        request: &CreateBookRequestDTO,
     ) -> Result<EntityCreationDTO, ApplicationError> {
         let context = AuditContext::new(actor, self.clock.as_ref());
 
         let author_names = request
             .author_names
-            .into_iter()
-            .map(|name| name.try_into())
+            .iter()
+            .map(|name| name.clone().try_into())
             .collect::<Result<Vec<AuthorName>, _>>()?;
 
         let authors_refs = self
@@ -41,10 +41,10 @@ impl CreateBookService {
 
         let book = Book::create_new(
             &context,
-            request.title.try_into()?,
+            request.title.clone().try_into()?,
             BookAuthorList::try_new(author_names, authors_refs)?,
-            request.isbn.try_into()?,
-            request.description.try_into()?,
+            request.isbn.clone().try_into()?,
+            request.description.clone().try_into()?,
             actor.into(),
         )?;
 

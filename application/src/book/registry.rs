@@ -1,15 +1,10 @@
 use std::sync::Arc;
 
-use domain::{
-    audit::{Actor, Clock},
-    book::interface::BookRepository,
-};
-use uuid::Uuid;
+use domain::{audit::Clock, book::interface::BookRepository};
 
 use crate::{
     author::service::AuthorsFactoryService,
-    book::{command::*, dto::*, interface::BookQueryService, query::*},
-    shared::{EntityCreationDTO, error::ApplicationError},
+    book::{command::*, interface::*, query::*},
 };
 
 pub struct BookRegistry {
@@ -60,63 +55,35 @@ impl BookRegistry {
         }
     }
 
-    pub async fn create_book(
-        &self,
-        actor: &Actor,
-        request: CreateBookRequestDTO,
-    ) -> Result<EntityCreationDTO, ApplicationError> {
-        self.create_book.execute(actor, request).await
+    pub fn create_book(&self) -> Arc<CreateBookService> {
+        self.create_book.clone()
     }
 
-    pub async fn update_book(
-        &self,
-        actor: &Actor,
-        book_id: Uuid,
-        request: UpdateBookRequestDTO,
-    ) -> Result<(), ApplicationError> {
-        self.update_book.execute(actor, book_id, request).await
+    pub fn update_book(&self) -> Arc<UpdateBookService> {
+        self.update_book.clone()
     }
 
-    pub async fn delete_book(&self, actor: &Actor, book_id: Uuid) -> Result<(), ApplicationError> {
-        self.delete_book.execute(actor, book_id).await
+    pub fn delete_book(&self) -> Arc<DeleteBookService> {
+        self.delete_book.clone()
     }
 
-    pub async fn checkout_book(
-        &self,
-        actor: &Actor,
-        book_id: Uuid,
-    ) -> Result<(), ApplicationError> {
-        self.checkout_book.execute(actor, book_id).await
+    pub fn checkout_book(&self) -> Arc<CheckoutBookService> {
+        self.checkout_book.clone()
     }
 
-    pub async fn return_book(&self, actor: &Actor, book_id: Uuid) -> Result<(), ApplicationError> {
-        self.return_book.execute(actor, book_id).await
+    pub fn return_book(&self) -> Arc<ReturnBookService> {
+        self.return_book.clone()
     }
 
-    pub async fn get_book_details(
-        &self,
-        actor: Option<&Actor>,
-        book_id: Uuid,
-    ) -> Result<BookDetailsDTO, ApplicationError> {
-        self.get_book_details.execute(actor, book_id).await
+    pub fn get_book_details(&self) -> Arc<GetBookDetailsService> {
+        self.get_book_details.clone()
     }
 
-    pub async fn get_book_list(
-        &self,
-        actor: Option<&Actor>,
-        query: BookListQueryDTO,
-    ) -> Result<BookListResponseDTO, ApplicationError> {
-        self.get_book_list.execute(actor, query).await
+    pub fn get_book_list(&self) -> Arc<GetBookListService> {
+        self.get_book_list.clone()
     }
 
-    pub async fn get_checkout_history(
-        &self,
-        actor: &Actor,
-        book_id: Uuid,
-        query: CheckoutHistoryQueryDTO,
-    ) -> Result<CheckoutHistoryListDTO, ApplicationError> {
-        self.get_checkout_history
-            .execute(actor, book_id, query)
-            .await
+    pub fn get_checkout_history(&self) -> Arc<GetCheckoutHistoryService> {
+        self.get_checkout_history.clone()
     }
 }

@@ -1,15 +1,11 @@
 use std::sync::Arc;
 
 use domain::{
-    audit::{Actor, Clock},
+    audit::Clock,
     user::interface::{UserDomainQueryService, UserRepository},
 };
-use uuid::Uuid;
 
-use crate::{
-    shared::error::ApplicationError,
-    user::{command::*, dto::*, interface::UserQueryService, query::*},
-};
+use crate::user::{command::*, interface::*, query::*};
 
 pub struct UserRegistry {
     get_or_create_user: Arc<GetOrCreateActorService>,
@@ -36,17 +32,11 @@ impl UserRegistry {
         }
     }
 
-    pub async fn get_or_create_actor(
-        &self,
-        request: GetOrCreateUserRequestDTO,
-    ) -> Result<Actor, ApplicationError> {
-        self.get_or_create_user.execute(request).await
+    pub fn get_or_create_user(&self) -> Arc<GetOrCreateActorService> {
+        self.get_or_create_user.clone()
     }
 
-    pub async fn get_user_details(
-        &self,
-        user_id: Uuid,
-    ) -> Result<UserDetailsDTO, ApplicationError> {
-        self.get_user_details.execute(user_id).await
+    pub fn get_user_details(&self) -> Arc<GetUserDetailsService> {
+        self.get_user_details.clone()
     }
 }

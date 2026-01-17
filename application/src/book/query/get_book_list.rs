@@ -21,12 +21,12 @@ impl GetBookListService {
     pub async fn execute(
         &self,
         actor: Option<&Actor>,
-        query: BookListQueryDTO,
+        query: &BookListQueryDTO,
     ) -> Result<BookListResponseDTO, ApplicationError> {
         query.validate()?;
 
         self.book_query_service
-            .get_book_list(actor, &query)
+            .get_book_list(actor, query)
             .await
             .map_err(|e| e.into())
     }

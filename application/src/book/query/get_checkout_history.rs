@@ -23,7 +23,7 @@ impl GetCheckoutHistoryService {
         &self,
         actor: &Actor,
         book_id: Uuid,
-        query: CheckoutHistoryQueryDTO,
+        query: &CheckoutHistoryQueryDTO,
     ) -> Result<CheckoutHistoryListDTO, ApplicationError> {
         if !actor.is_admin() {
             return Err(ApplicationError::Forbidden);
@@ -32,7 +32,7 @@ impl GetCheckoutHistoryService {
         query.validate()?;
 
         self.book_query_service
-            .get_checkout_history(book_id, &query)
+            .get_checkout_history(book_id, query)
             .await
             .map_err(|e| e.into())
     }

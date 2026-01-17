@@ -70,21 +70,23 @@ impl AppRegistry {
         Self::build(config, clock).await
     }
 
-    pub async fn prepare_actor(&self, user_info: OidcUserInfo) -> Result<Actor, ApiError> {
+    pub async fn prepare_actor(&self, user_info: &OidcUserInfo) -> Result<Actor, ApiError> {
         self.user_registry()
-            .get_or_create_actor(user_info.try_into()?)
+            .get_or_create_user()
+            .execute(&user_info.clone().try_into()?)
             .await
             .map_err(|e| e.into())
     }
 
     pub async fn prepare_optional_actor(
         &self,
-        user_info: Option<OidcUserInfo>,
+        user_info: Option<&OidcUserInfo>,
     ) -> Result<Option<Actor>, ApiError> {
         if let Some(info) = user_info {
             let actor = self
                 .user_registry()
-                .get_or_create_actor(info.try_into()?)
+                .get_or_create_user()
+                .execute(&info.clone().try_into()?)
                 .await?;
             Ok(Some(actor))
         } else {

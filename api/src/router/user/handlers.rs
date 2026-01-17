@@ -12,14 +12,15 @@ use crate::{auth::OidcUserInfo, error::ApiError, registry::AppRegistry};
     err
 )]
 pub async fn get_me_details(
-    State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
+    State(registry): State<AppRegistry>,
 ) -> Result<Json<UserDetailsDTO>, ApiError> {
-    let actor = registry.prepare_actor(user_info).await?;
+    let actor = registry.prepare_actor(&user_info).await?;
 
     let response = registry
         .user_registry()
-        .get_user_details(actor.raw_id())
+        .get_user_details()
+        .execute(actor.raw_id())
         .await?;
 
     Ok(Json(response))

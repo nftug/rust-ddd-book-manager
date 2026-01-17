@@ -21,7 +21,7 @@ pub struct GetOrCreateActorService {
 impl GetOrCreateActorService {
     pub async fn execute(
         &self,
-        request: GetOrCreateUserRequestDTO,
+        request: &GetOrCreateUserRequestDTO,
     ) -> Result<Actor, ApplicationError> {
         let context = AuditContext::new(&Actor::new_system(), self.clock.as_ref());
 
@@ -40,8 +40,8 @@ impl GetOrCreateActorService {
 
                 user_from_request.update(
                     &context,
-                    request.name.try_into()?,
-                    request.email.try_into()?,
+                    request.name.clone().try_into()?,
+                    request.email.clone().try_into()?,
                     request.role.into(),
                 )?;
 
@@ -55,8 +55,8 @@ impl GetOrCreateActorService {
             let new_user = User::create_new(
                 &context,
                 request.id.into(),
-                request.name.try_into()?,
-                request.email.try_into()?,
+                request.name.clone().try_into()?,
+                request.email.clone().try_into()?,
                 request.role.into(),
             )?;
 

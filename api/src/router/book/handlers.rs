@@ -28,11 +28,12 @@ pub async fn get_book_details(
     State(registry): State<AppRegistry>,
     Path(BookIdPath { book_id }): Path<BookIdPath>,
 ) -> Result<Json<BookDetailsDTO>, ApiError> {
-    let actor = registry.prepare_optional_actor(user_info).await?;
+    let actor = registry.prepare_optional_actor(user_info.as_ref()).await?;
 
     let response = registry
         .book_registry()
-        .get_book_details(actor.as_ref(), book_id)
+        .get_book_details()
+        .execute(actor.as_ref(), book_id)
         .await?;
 
     Ok(Json(response))
@@ -46,15 +47,16 @@ pub async fn get_book_details(
     err
 )]
 pub async fn get_book_list(
-    State(registry): State<AppRegistry>,
     user_info: Option<OidcUserInfo>,
+    State(registry): State<AppRegistry>,
     Query(query): Query<BookListQueryDTO>,
 ) -> Result<Json<BookListResponseDTO>, ApiError> {
-    let actor = registry.prepare_optional_actor(user_info).await?;
+    let actor = registry.prepare_optional_actor(user_info.as_ref()).await?;
 
     let response = registry
         .book_registry()
-        .get_book_list(actor.as_ref(), query)
+        .get_book_list()
+        .execute(actor.as_ref(), &query)
         .await?;
 
     Ok(Json(response))
@@ -68,15 +70,16 @@ pub async fn get_book_list(
     err
 )]
 pub async fn create_book(
-    State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
+    State(registry): State<AppRegistry>,
     Json(request): Json<CreateBookRequestDTO>,
 ) -> Result<(StatusCode, Json<EntityCreationDTO>), ApiError> {
-    let actor = registry.prepare_actor(user_info).await?;
+    let actor = registry.prepare_actor(&user_info).await?;
 
     let response = registry
         .book_registry()
-        .create_book(&actor, request)
+        .create_book()
+        .execute(&actor, &request)
         .await?;
 
     Ok((StatusCode::CREATED, Json(response)))
@@ -90,16 +93,17 @@ pub async fn create_book(
     err
 )]
 pub async fn update_book(
-    State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
+    State(registry): State<AppRegistry>,
     Path(BookIdPath { book_id }): Path<BookIdPath>,
     Json(request): Json<UpdateBookRequestDTO>,
 ) -> Result<NoContent, ApiError> {
-    let actor = registry.prepare_actor(user_info).await?;
+    let actor = registry.prepare_actor(&user_info).await?;
 
     registry
         .book_registry()
-        .update_book(&actor, book_id, request)
+        .update_book()
+        .execute(&actor, book_id, &request)
         .await?;
 
     Ok(NoContent)
@@ -113,15 +117,16 @@ pub async fn update_book(
     err
 )]
 pub async fn delete_book(
-    State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
+    State(registry): State<AppRegistry>,
     Path(BookIdPath { book_id }): Path<BookIdPath>,
 ) -> Result<NoContent, ApiError> {
-    let actor = registry.prepare_actor(user_info).await?;
+    let actor = registry.prepare_actor(&user_info).await?;
 
     registry
         .book_registry()
-        .delete_book(&actor, book_id)
+        .delete_book()
+        .execute(&actor, book_id)
         .await?;
 
     Ok(NoContent)
@@ -135,16 +140,17 @@ pub async fn delete_book(
     err
 )]
 pub async fn get_checkout_history(
+    user_info: OidcUserInfo,
     State(registry): State<AppRegistry>,
     Path(BookIdPath { book_id }): Path<BookIdPath>,
     Query(query): Query<CheckoutHistoryQueryDTO>,
-    user_info: OidcUserInfo,
 ) -> Result<Json<CheckoutHistoryListDTO>, ApiError> {
-    let actor = registry.prepare_actor(user_info).await?;
+    let actor = registry.prepare_actor(&user_info).await?;
 
     let response = registry
         .book_registry()
-        .get_checkout_history(&actor, book_id, query)
+        .get_checkout_history()
+        .execute(&actor, book_id, &query)
         .await?;
 
     Ok(Json(response))
@@ -158,15 +164,16 @@ pub async fn get_checkout_history(
     err
 )]
 pub async fn checkout_book(
-    State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
+    State(registry): State<AppRegistry>,
     Path(BookIdPath { book_id }): Path<BookIdPath>,
 ) -> Result<NoContent, ApiError> {
-    let actor = registry.prepare_actor(user_info).await?;
+    let actor = registry.prepare_actor(&user_info).await?;
 
     registry
         .book_registry()
-        .checkout_book(&actor, book_id)
+        .checkout_book()
+        .execute(&actor, book_id)
         .await?;
 
     Ok(NoContent)
@@ -180,15 +187,16 @@ pub async fn checkout_book(
     err
 )]
 pub async fn return_book(
-    State(registry): State<AppRegistry>,
     user_info: OidcUserInfo,
+    State(registry): State<AppRegistry>,
     Path(BookIdPath { book_id }): Path<BookIdPath>,
 ) -> Result<NoContent, ApiError> {
-    let actor = registry.prepare_actor(user_info).await?;
+    let actor = registry.prepare_actor(&user_info).await?;
 
     registry
         .book_registry()
-        .return_book(&actor, book_id)
+        .return_book()
+        .execute(&actor, book_id)
         .await?;
 
     Ok(NoContent)
