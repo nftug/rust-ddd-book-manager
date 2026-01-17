@@ -7,9 +7,8 @@ use crate::{
     shared::{AuditDTO, AuditSummaryDTO, PaginationDTO, UserReferenceDTO},
 };
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct BookDetailsDTO {
     pub id: Uuid,
     pub title: String,
@@ -21,18 +20,16 @@ pub struct BookDetailsDTO {
     pub audit: AuditDTO,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct BookCheckoutDTO {
     pub checkout_id: Uuid,
     pub checked_out_at: DateTime<Utc>,
     pub checked_out_to: UserReferenceDTO,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct BookListItemDTO {
     pub id: Uuid,
     pub title: String,
@@ -44,9 +41,8 @@ pub struct BookListItemDTO {
 
 pub type BookListResponseDTO = PaginationDTO<BookListItemDTO>;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct BookCheckoutWithReturnDTO {
     pub checkout_id: Uuid,
     pub checked_out_at: DateTime<Utc>,

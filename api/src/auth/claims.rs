@@ -1,5 +1,6 @@
 use std::str::FromStr;
 
+use aide::OperationInput;
 use application::user::dto::{GetOrCreateUserRequestDTO, UserRoleDTO};
 use serde::Deserialize;
 use uuid::Uuid;
@@ -33,6 +34,8 @@ pub struct OidcUserInfo {
     pub email: Option<String>,
     pub username: Option<String>,
 }
+
+impl OperationInput for OidcUserInfo {}
 
 impl From<KeycloakClaims> for OidcUserInfo {
     fn from(claims: KeycloakClaims) -> Self {

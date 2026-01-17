@@ -19,4 +19,4 @@ serde.workspace = true
 async-trait.workspace = true
 
 garde = { version = "0.22.1", features = ["derive"] }
-utoipa = { workspace = true, features = ["uuid", "chrono"] }
+schemars.workspace = true

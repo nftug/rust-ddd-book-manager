@@ -2,9 +2,8 @@ use garde::Validate;
 use serde::Deserialize;
 use uuid::Uuid;
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, schemars::JsonSchema)]
 #[serde(rename_all = "snake_case")]
-#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct BookListQueryDTO {
     #[garde(range(min = 1))]
     #[serde(default = "default_page_size")]
@@ -20,9 +19,8 @@ pub struct BookListQueryDTO {
     pub checked_out_to_id: Option<Uuid>,
 }
 
-#[derive(Debug, Deserialize, Validate)]
+#[derive(Debug, Deserialize, Validate, schemars::JsonSchema)]
 #[serde(rename_all = "snake_case")]
-#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct CheckoutHistoryQueryDTO {
     #[garde(range(min = 1))]
     #[serde(default = "default_page_size")]

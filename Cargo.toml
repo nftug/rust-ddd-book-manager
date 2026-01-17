@@ -23,7 +23,7 @@ strum = { version = "0.27.2", features = ["derive"] }
 itertools = "0.14.0"
 tracing = { version = "0.1.44", features = ["log"] }
 async-trait = "0.1.89"
-utoipa = { version = "5.4.0" }
+schemars = { version = "1.0.4", features = ["chrono04", "uuid1"] }
 
 [profile.release]
 lto = true

@@ -1,7 +1,7 @@
 use std::net::{Ipv4Addr, SocketAddr};
 
 use api::{
-    logging::{build_trace_layer, init_logger},
+    logger::{build_trace_layer, init_logger},
     registry::AppRegistry,
     router::build_router,
 };
@@ -14,7 +14,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     init_logger(&config)?;
 
-    let app = build_router()
+    let app = build_router(&config.oidc)
         .layer(build_trace_layer())
         .with_state(registry);
 

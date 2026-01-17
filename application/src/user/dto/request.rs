@@ -3,9 +3,8 @@ use uuid::Uuid;
 
 use crate::user::dto::UserRoleDTO;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
-#[cfg_attr(debug_assertions, derive(utoipa::ToSchema))]
 pub struct GetOrCreateUserRequestDTO {
     pub id: Uuid,
     pub name: String,

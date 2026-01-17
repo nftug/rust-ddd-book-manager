@@ -1,3 +1,4 @@
+use aide::OperationOutput;
 use application::shared::error::ApplicationError;
 use axum::response::IntoResponse;
 use domain::shared::error::DomainError;
@@ -67,4 +68,8 @@ impl IntoResponse for ApiError {
             status.into_response()
         }
     }
+}
+
+impl OperationOutput for ApiError {
+    type Inner = ApiError;
 }
