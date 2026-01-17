@@ -1,12 +1,11 @@
 use std::sync::Arc;
 
-use derive_new::new;
-use uuid::Uuid;
-
 use crate::{
     shared::error::ApplicationError,
     user::{dto::UserDetailsDTO, interface::UserQueryService},
 };
+use derive_new::new;
+use domain::user::values::UserId;
 
 #[derive(new)]
 pub struct GetUserDetailsService {
@@ -14,7 +13,7 @@ pub struct GetUserDetailsService {
 }
 
 impl GetUserDetailsService {
-    pub async fn execute(&self, user_id: Uuid) -> Result<UserDetailsDTO, ApplicationError> {
+    pub async fn execute(&self, user_id: UserId) -> Result<UserDetailsDTO, ApplicationError> {
         self.user_query_service
             .get_user_details(user_id)
             .await

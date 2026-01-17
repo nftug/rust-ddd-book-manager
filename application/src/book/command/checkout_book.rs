@@ -5,9 +5,8 @@ use domain::{
     audit::{Actor, AuditContext, Clock},
     book::interface::BookRepository,
 };
-use uuid::Uuid;
 
-use crate::shared::error::ApplicationError;
+use crate::{book::dto::BookIdentity, shared::error::ApplicationError};
 
 #[derive(new)]
 pub struct CheckoutBookService {
@@ -16,12 +15,16 @@ pub struct CheckoutBookService {
 }
 
 impl CheckoutBookService {
-    pub async fn execute(&self, actor: &Actor, book_id: Uuid) -> Result<(), ApplicationError> {
+    pub async fn execute(
+        &self,
+        actor: &Actor,
+        identity: BookIdentity,
+    ) -> Result<(), ApplicationError> {
         let context = AuditContext::new(actor, self.clock.as_ref());
 
         let mut book = self
             .book_repository
-            .find_by_id(book_id.into())
+            .find_by_id(identity.book_id)
             .await?
             .ok_or(ApplicationError::NotFound)?;
 

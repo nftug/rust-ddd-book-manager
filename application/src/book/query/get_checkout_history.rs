@@ -3,11 +3,10 @@ use std::sync::Arc;
 use derive_new::new;
 use domain::audit::Actor;
 use garde::Validate;
-use uuid::Uuid;
 
 use crate::{
     book::{
-        dto::{CheckoutHistoryListDTO, CheckoutHistoryQueryDTO},
+        dto::{BookIdentity, CheckoutHistoryListDTO, CheckoutHistoryQueryDTO},
         interface::BookQueryService,
     },
     shared::error::ApplicationError,
@@ -22,7 +21,7 @@ impl GetCheckoutHistoryService {
     pub async fn execute(
         &self,
         actor: &Actor,
-        book_id: Uuid,
+        identity: BookIdentity,
         query: &CheckoutHistoryQueryDTO,
     ) -> Result<CheckoutHistoryListDTO, ApplicationError> {
         if !actor.is_admin() {
@@ -32,7 +31,7 @@ impl GetCheckoutHistoryService {
         query.validate()?;
 
         self.book_query_service
-            .get_checkout_history(book_id, query)
+            .get_checkout_history(identity, query)
             .await
             .map_err(|e| e.into())
     }

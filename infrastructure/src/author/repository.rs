@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use derive_new::new;
 use domain::{
     author::{entity::Author, interface::AuthorRepository, values::*},
-    shared::{Id, error::PersistenceError},
+    shared::error::PersistenceError,
 };
 use sea_orm::{ActiveValue::Set, ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter};
 
@@ -19,7 +19,7 @@ pub struct AuthorRepositoryImpl {
 #[async_trait]
 impl AuthorRepository for AuthorRepositoryImpl {
     async fn find_by_id(&self, id: AuthorId) -> Result<Option<Author>, PersistenceError> {
-        let result = authors::Entity::find_by_id(id.raw())
+        let result = authors::Entity::find_by_id(id)
             .one(self.db.inner_ref())
             .await
             .map_err(log_db_error)?;
@@ -60,7 +60,7 @@ impl AuthorRepository for AuthorRepositoryImpl {
     }
 
     async fn delete(&self, id: AuthorId) -> Result<(), PersistenceError> {
-        let result = authors::Entity::delete_by_id(id.raw())
+        let result = authors::Entity::delete_by_id(id)
             .exec(self.db.inner_ref())
             .await
             .map_err(log_db_error)?;

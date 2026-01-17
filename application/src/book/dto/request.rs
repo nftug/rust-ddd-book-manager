@@ -1,5 +1,5 @@
+use domain::user::values::UserId;
 use serde::Deserialize;
-use uuid::Uuid;
 
 #[derive(Debug, Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
@@ -22,5 +22,5 @@ pub struct UpdateBookRequestDTO {
 #[derive(Debug, Deserialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct ChangeBookOwnerRequestDTO {
-    pub new_owner_id: Uuid,
+    pub new_owner_id: UserId,
 }

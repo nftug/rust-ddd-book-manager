@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use derive_new::new;
 use domain::{
     book::{entity::Book, interface::BookRepository, values::*},
-    shared::{Id, error::PersistenceError},
+    shared::{EntityIdTrait, error::PersistenceError},
 };
 use sea_orm::{
     ActiveValue::Set, ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder,
@@ -27,7 +27,7 @@ pub struct BookRepositoryImpl {
 #[async_trait]
 impl BookRepository for BookRepositoryImpl {
     async fn find_by_id(&self, id: BookId) -> Result<Option<Book>, PersistenceError> {
-        let rows = books::Entity::find_by_id(id.raw())
+        let rows = books::Entity::find_by_id(id)
             .inner_join(authors::Entity)
             .inner_join(users::Entity)
             .left_join(book_checkouts::Entity)

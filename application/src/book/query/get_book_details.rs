@@ -2,10 +2,12 @@ use std::sync::Arc;
 
 use derive_new::new;
 use domain::audit::Actor;
-use uuid::Uuid;
 
 use crate::{
-    book::{dto::BookDetailsDTO, interface::BookQueryService},
+    book::{
+        dto::{BookDetailsDTO, BookIdentity},
+        interface::BookQueryService,
+    },
     shared::error::ApplicationError,
 };
 
@@ -18,10 +20,10 @@ impl GetBookDetailsService {
     pub async fn execute(
         &self,
         actor: Option<&Actor>,
-        book_id: Uuid,
+        identity: BookIdentity,
     ) -> Result<BookDetailsDTO, ApplicationError> {
         self.book_query_service
-            .get_book_details(actor, book_id)
+            .get_book_details(actor, identity)
             .await
             .map_err(|e| e.into())
             .and_then(|opt| opt.ok_or(ApplicationError::NotFound))

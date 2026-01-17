@@ -1,10 +1,22 @@
 #[macro_export]
 macro_rules! define_id {
     ($id_type: ident) => {
-        #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Default)]
+        #[derive(
+            Debug,
+            Clone,
+            Copy,
+            PartialEq,
+            Eq,
+            Hash,
+            Default,
+            serde::Deserialize,
+            serde::Serialize,
+            schemars::JsonSchema,
+        )]
+        #[serde(into = "uuid::Uuid", from = "uuid::Uuid")]
         pub struct $id_type(uuid::Uuid);
 
-        impl $crate::shared::id::id_type::Id for $id_type {
+        impl $crate::shared::id::id_type::EntityIdTrait for $id_type {
             fn new() -> Self {
                 Self(uuid::Uuid::new_v4())
             }
@@ -44,7 +56,7 @@ macro_rules! define_id {
 pub mod id_type {
     use uuid::Uuid;
 
-    pub trait Id:
+    pub trait EntityIdTrait:
         Sized + Clone + std::fmt::Debug + PartialEq + Eq + Copy + From<Uuid> + Into<Uuid>
     {
         fn new() -> Self;
@@ -52,4 +64,4 @@ pub mod id_type {
     }
 }
 
-pub use id_type::Id;
+pub use id_type::EntityIdTrait;

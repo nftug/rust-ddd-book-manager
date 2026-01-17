@@ -1,5 +1,5 @@
 use chrono::{DateTime, Utc};
-use domain::{audit::EntityAudit, auth::permission::Permission, shared::Id};
+use domain::{audit::EntityAudit, auth::permission::Permission, shared::EntityIdTrait};
 use serde::Serialize;
 use uuid::Uuid;
 
@@ -59,7 +59,7 @@ pub struct EntityCreationDTO {
     pub id: Uuid,
 }
 
-impl<EId: Id> From<&EntityAudit<EId>> for EntityCreationDTO {
+impl<EId: EntityIdTrait> From<&EntityAudit<EId>> for EntityCreationDTO {
     fn from(audit: &EntityAudit<EId>) -> Self {
         let id = audit.id().into();
         EntityCreationDTO { id }

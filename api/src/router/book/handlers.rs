@@ -6,15 +6,8 @@ use axum::{
 };
 
 use reqwest::StatusCode;
-use serde::Deserialize;
-use uuid::Uuid;
 
 use crate::{auth::OidcUserInfo, error::ApiError, registry::AppRegistry};
-
-#[derive(Debug, Deserialize, schemars::JsonSchema)]
-pub struct BookIdPath {
-    book_id: Uuid,
-}
 
 #[tracing::instrument(
     skip(registry, user_info),
@@ -26,14 +19,14 @@ pub struct BookIdPath {
 pub async fn get_book_details(
     user_info: Option<OidcUserInfo>,
     State(registry): State<AppRegistry>,
-    Path(BookIdPath { book_id }): Path<BookIdPath>,
+    Path(identity): Path<BookIdentity>,
 ) -> Result<Json<BookDetailsDTO>, ApiError> {
     let actor = registry.prepare_optional_actor(user_info.as_ref()).await?;
 
     let response = registry
         .book_registry()
         .get_book_details()
-        .execute(actor.as_ref(), book_id)
+        .execute(actor.as_ref(), identity)
         .await?;
 
     Ok(Json(response))
@@ -95,7 +88,7 @@ pub async fn create_book(
 pub async fn update_book(
     user_info: OidcUserInfo,
     State(registry): State<AppRegistry>,
-    Path(BookIdPath { book_id }): Path<BookIdPath>,
+    Path(identity): Path<BookIdentity>,
     Json(request): Json<UpdateBookRequestDTO>,
 ) -> Result<NoContent, ApiError> {
     let actor = registry.prepare_actor(&user_info).await?;
@@ -103,7 +96,7 @@ pub async fn update_book(
     registry
         .book_registry()
         .update_book()
-        .execute(&actor, book_id, &request)
+        .execute(&actor, identity, &request)
         .await?;
 
     Ok(NoContent)
@@ -119,14 +112,14 @@ pub async fn update_book(
 pub async fn delete_book(
     user_info: OidcUserInfo,
     State(registry): State<AppRegistry>,
-    Path(BookIdPath { book_id }): Path<BookIdPath>,
+    Path(identity): Path<BookIdentity>,
 ) -> Result<NoContent, ApiError> {
     let actor = registry.prepare_actor(&user_info).await?;
 
     registry
         .book_registry()
         .delete_book()
-        .execute(&actor, book_id)
+        .execute(&actor, identity)
         .await?;
 
     Ok(NoContent)
@@ -142,7 +135,7 @@ pub async fn delete_book(
 pub async fn get_checkout_history(
     user_info: OidcUserInfo,
     State(registry): State<AppRegistry>,
-    Path(BookIdPath { book_id }): Path<BookIdPath>,
+    Path(identity): Path<BookIdentity>,
     Query(query): Query<CheckoutHistoryQueryDTO>,
 ) -> Result<Json<CheckoutHistoryListDTO>, ApiError> {
     let actor = registry.prepare_actor(&user_info).await?;
@@ -150,7 +143,7 @@ pub async fn get_checkout_history(
     let response = registry
         .book_registry()
         .get_checkout_history()
-        .execute(&actor, book_id, &query)
+        .execute(&actor, identity, &query)
         .await?;
 
     Ok(Json(response))
@@ -166,14 +159,14 @@ pub async fn get_checkout_history(
 pub async fn checkout_book(
     user_info: OidcUserInfo,
     State(registry): State<AppRegistry>,
-    Path(BookIdPath { book_id }): Path<BookIdPath>,
+    Path(identity): Path<BookIdentity>,
 ) -> Result<NoContent, ApiError> {
     let actor = registry.prepare_actor(&user_info).await?;
 
     registry
         .book_registry()
         .checkout_book()
-        .execute(&actor, book_id)
+        .execute(&actor, identity)
         .await?;
 
     Ok(NoContent)
@@ -189,14 +182,14 @@ pub async fn checkout_book(
 pub async fn return_book(
     user_info: OidcUserInfo,
     State(registry): State<AppRegistry>,
-    Path(BookIdPath { book_id }): Path<BookIdPath>,
+    Path(identity): Path<BookIdentity>,
 ) -> Result<NoContent, ApiError> {
     let actor = registry.prepare_actor(&user_info).await?;
 
     registry
         .book_registry()
         .return_book()
-        .execute(&actor, book_id)
+        .execute(&actor, identity)
         .await?;
 
     Ok(NoContent)

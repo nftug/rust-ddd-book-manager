@@ -71,7 +71,7 @@ impl TryFrom<OidcUserInfo> for GetOrCreateUserRequestDTO {
         };
 
         Ok(GetOrCreateUserRequestDTO {
-            id: user_info.id,
+            id: user_info.id.into(),
             name: full_name,
             email,
             role,

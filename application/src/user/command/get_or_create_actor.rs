@@ -27,16 +27,13 @@ impl GetOrCreateActorService {
 
         if let Some(actor) = self
             .user_domain_query_service
-            .find_actor_by_id(request.id.into())
+            .find_actor_by_id(request.id)
             .await?
         {
             // If the user info from the request is different from the existing user, update it
             if actor.name() != request.name || actor.role() != request.role.into() {
-                let mut user_from_request = self
-                    .user_repository
-                    .find_by_id(request.id.into())
-                    .await?
-                    .unwrap();
+                let mut user_from_request =
+                    self.user_repository.find_by_id(request.id).await?.unwrap();
 
                 user_from_request.update(
                     &context,
@@ -54,7 +51,7 @@ impl GetOrCreateActorService {
         } else {
             let new_user = User::create_new(
                 &context,
-                request.id.into(),
+                request.id,
                 request.name.clone().try_into()?,
                 request.email.clone().try_into()?,
                 request.role.into(),

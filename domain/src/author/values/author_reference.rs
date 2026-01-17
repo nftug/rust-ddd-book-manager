@@ -2,7 +2,7 @@ use uuid::Uuid;
 
 use crate::{
     author::values::{AuthorId, AuthorName},
-    shared::Id,
+    shared::EntityIdTrait,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]

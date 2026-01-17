@@ -20,7 +20,7 @@ pub async fn get_me_details(
     let response = registry
         .user_registry()
         .get_user_details()
-        .execute(actor.raw_id())
+        .execute(actor.id())
         .await?;
 
     Ok(Json(response))

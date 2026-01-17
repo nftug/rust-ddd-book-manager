@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use derive_new::new;
 use domain::{
     audit::Actor,
-    shared::{Id, error::PersistenceError},
+    shared::error::PersistenceError,
     user::{interface::UserDomainQueryService, values::UserId},
 };
 use sea_orm::EntityTrait;
@@ -17,7 +17,7 @@ pub struct UserDomainQueryServiceImpl {
 #[async_trait]
 impl UserDomainQueryService for UserDomainQueryServiceImpl {
     async fn find_actor_by_id(&self, id: UserId) -> Result<Option<Actor>, PersistenceError> {
-        let result = users::Entity::find_by_id(id.raw())
+        let result = users::Entity::find_by_id(id)
             .into_partial_model::<ActorRow>()
             .one(self.db.inner_ref())
             .await

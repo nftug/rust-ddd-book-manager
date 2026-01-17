@@ -6,10 +6,10 @@ use domain::{
     author::values::AuthorName,
     book::{interface::BookRepository, values::BookAuthorList},
 };
-use uuid::Uuid;
 
 use crate::{
-    author::service::AuthorsFactoryService, book::dto::UpdateBookRequestDTO,
+    author::service::AuthorsFactoryService,
+    book::dto::{BookIdentity, UpdateBookRequestDTO},
     shared::error::ApplicationError,
 };
 
@@ -24,14 +24,14 @@ impl UpdateBookService {
     pub async fn execute(
         &self,
         actor: &Actor,
-        book_id: Uuid,
+        identity: BookIdentity,
         request: &UpdateBookRequestDTO,
     ) -> Result<(), ApplicationError> {
         let context = AuditContext::new(actor, self.clock.as_ref());
 
         let mut book = self
             .book_repository
-            .find_by_id(book_id.into())
+            .find_by_id(identity.book_id)
             .await?
             .ok_or(ApplicationError::NotFound)?;
 

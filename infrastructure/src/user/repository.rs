@@ -3,7 +3,7 @@ use std::str::FromStr;
 use async_trait::async_trait;
 use derive_new::new;
 use domain::{
-    shared::{Id, error::PersistenceError},
+    shared::error::PersistenceError,
     user::{entity::User, enums::UserRole, interface::UserRepository, values::*},
 };
 use sea_orm::{ActiveValue::Set, ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter};
@@ -21,7 +21,7 @@ pub struct UserRepositoryImpl {
 #[async_trait]
 impl UserRepository for UserRepositoryImpl {
     async fn find_by_id(&self, id: UserId) -> Result<Option<User>, PersistenceError> {
-        let result = users::Entity::find_by_id(id.raw())
+        let result = users::Entity::find_by_id(id)
             .one(self.db.inner_ref())
             .await
             .map_err(log_db_error)?;
@@ -72,7 +72,7 @@ impl UserRepository for UserRepositoryImpl {
     }
 
     async fn delete(&self, id: UserId) -> Result<(), PersistenceError> {
-        let result = users::Entity::delete_by_id(id.raw())
+        let result = users::Entity::delete_by_id(id)
             .exec(self.db.inner_ref())
             .await
             .map_err(log_db_error)?;

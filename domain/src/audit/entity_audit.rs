@@ -4,12 +4,12 @@ use uuid::Uuid;
 use crate::{
     audit::AuditContext,
     auth::permission::Permission,
-    shared::{Id, error::DomainError},
+    shared::{EntityIdTrait, error::DomainError},
     user::values::UserReference,
 };
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct EntityAudit<EId: Id> {
+pub struct EntityAudit<EId: EntityIdTrait> {
     id: EId,
     created_at: DateTime<Utc>,
     created_by: UserReference,
@@ -17,7 +17,7 @@ pub struct EntityAudit<EId: Id> {
     updated_by: Option<UserReference>,
 }
 
-impl<EId: Id> EntityAudit<EId> {
+impl<EId: EntityIdTrait> EntityAudit<EId> {
     pub fn id(&self) -> EId {
         self.id
     }

@@ -1,9 +1,8 @@
 use application::user::{dto::UserDetailsDTO, interface::UserQueryService};
 use async_trait::async_trait;
 use derive_new::new;
-use domain::shared::error::PersistenceError;
+use domain::{shared::error::PersistenceError, user::values::UserId};
 use sea_orm::EntityTrait;
-use uuid::Uuid;
 
 use crate::database::{ConnectionPool, entity::users, log_db_error, row::user::UserDetailsDTORow};
 
@@ -16,7 +15,7 @@ pub struct UserQueryServiceImpl {
 impl UserQueryService for UserQueryServiceImpl {
     async fn get_user_details(
         &self,
-        user_id: Uuid,
+        user_id: UserId,
     ) -> Result<Option<UserDetailsDTO>, PersistenceError> {
         let result = users::Entity::find_by_id(user_id)
             .into_partial_model::<UserDetailsDTORow>()

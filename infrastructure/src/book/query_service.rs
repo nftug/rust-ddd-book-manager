@@ -4,7 +4,11 @@ use application::{
 };
 use async_trait::async_trait;
 use derive_new::new;
-use domain::{audit::Actor, auth::permission::EntityPermission, shared::error::PersistenceError};
+use domain::{
+    audit::Actor,
+    auth::permission::EntityPermission,
+    shared::{EntityIdTrait, error::PersistenceError},
+};
 use sea_orm::{
     ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, QueryTrait,
     Select,
@@ -28,9 +32,9 @@ impl BookQueryService for BookQueryServiceImpl {
     async fn get_book_details(
         &self,
         actor: Option<&Actor>,
-        book_id: Uuid,
+        identity: BookIdentity,
     ) -> Result<Option<BookDetailsDTO>, PersistenceError> {
-        let rows = books::Entity::find_by_id(book_id)
+        let rows = books::Entity::find_by_id(identity.book_id)
             .inner_join(authors::Entity)
             .inner_join(users::Entity)
             .left_join(book_checkouts::Entity)
@@ -117,12 +121,11 @@ impl BookQueryService for BookQueryServiceImpl {
 
     async fn get_checkout_history(
         &self,
-        book_id: Uuid,
+        identity: BookIdentity,
         query: &CheckoutHistoryQueryDTO,
     ) -> Result<CheckoutHistoryListDTO, PersistenceError> {
-        let db_query =
-            book_checkouts::Entity::find().filter(book_checkouts::Column::BookId.eq(book_id));
-
+        let db_query = book_checkouts::Entity::find()
+            .filter(book_checkouts::Column::BookId.eq(identity.book_id.raw()));
         let total_count = db_query
             .clone()
             .select_only()
