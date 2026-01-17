@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use derive_new::new;
 use domain::{
     book::{entity::Book, interface::BookRepository, values::*},
-    shared::{EntityIdTrait, error::PersistenceError},
+    shared::error::PersistenceError,
 };
 use sea_orm::{
     ActiveValue::Set, ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder,
@@ -126,7 +126,7 @@ impl BookRepository for BookRepositoryImpl {
     }
 
     async fn delete(&self, id: BookId) -> Result<(), PersistenceError> {
-        let result = books::Entity::delete_by_id(id.raw())
+        let result = books::Entity::delete_by_id(id)
             .exec(self.db.inner_ref())
             .await
             .map_err(log_db_error)?;

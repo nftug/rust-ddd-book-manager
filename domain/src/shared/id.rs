@@ -16,15 +16,13 @@ macro_rules! define_id {
         #[serde(into = "uuid::Uuid", from = "uuid::Uuid")]
         pub struct $id_type(uuid::Uuid);
 
-        impl $crate::shared::id::id_type::EntityIdTrait for $id_type {
-            fn new() -> Self {
-                Self(uuid::Uuid::new_v4())
-            }
-
-            fn raw(self) -> uuid::Uuid {
+        impl $id_type {
+            pub fn raw(self) -> uuid::Uuid {
                 self.0
             }
         }
+
+        impl $crate::shared::id::id_type::EntityIdTrait for $id_type {}
 
         impl From<uuid::Uuid> for $id_type {
             fn from(u: uuid::Uuid) -> Self {
@@ -59,9 +57,11 @@ pub mod id_type {
     pub trait EntityIdTrait:
         Sized + Clone + std::fmt::Debug + PartialEq + Eq + Copy + From<Uuid> + Into<Uuid>
     {
-        fn new() -> Self;
-        fn raw(self) -> uuid::Uuid;
+        fn new() -> Self {
+            Self::from(Uuid::new_v4())
+        }
     }
 }
 
+pub use define_id;
 pub use id_type::EntityIdTrait;

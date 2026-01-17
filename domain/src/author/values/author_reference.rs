@@ -1,9 +1,6 @@
 use uuid::Uuid;
 
-use crate::{
-    author::values::{AuthorId, AuthorName},
-    shared::EntityIdTrait,
-};
+use crate::author::values::{AuthorId, AuthorName};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AuthorReference(AuthorId, AuthorName);

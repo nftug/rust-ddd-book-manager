@@ -22,7 +22,7 @@ impl<EId: EntityIdTrait> EntityAudit<EId> {
         self.id
     }
     pub fn raw_id(&self) -> Uuid {
-        self.id.raw()
+        self.id.into()
     }
     pub fn created_at(&self) -> DateTime<Utc> {
         self.created_at

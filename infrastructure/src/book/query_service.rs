@@ -4,11 +4,7 @@ use application::{
 };
 use async_trait::async_trait;
 use derive_new::new;
-use domain::{
-    audit::Actor,
-    auth::permission::EntityPermission,
-    shared::{EntityIdTrait, error::PersistenceError},
-};
+use domain::{audit::Actor, auth::permission::EntityPermission, shared::error::PersistenceError};
 use sea_orm::{
     ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, QueryTrait,
     Select,
