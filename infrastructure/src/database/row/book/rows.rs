@@ -1,16 +1,16 @@
 use application::{book::dto::BookCheckoutDTO, shared::UserReferenceDTO};
 use domain::{book::values::BookCheckout, user::values::UserReference};
-use sea_orm::{DerivePartialModel, FromQueryResult, prelude::DateTimeWithTimeZone};
+use sea_orm::{DerivePartialModel, prelude::DateTimeWithTimeZone};
 use uuid::Uuid;
 
 use crate::database::row::{author::BookAuthorRow, user::UserReferenceRow};
 
-#[derive(DerivePartialModel, FromQueryResult, Clone)]
+#[derive(DerivePartialModel, Clone)]
 #[sea_orm(entity = "crate::database::entity::books::Entity")]
 pub struct BookDetailsRow {
     pub id: Uuid,
     pub title: String,
-    #[sea_orm(nested)]
+    #[sea_orm(nested, alias = "authors")]
     pub author: BookAuthorRow,
     pub isbn: Option<String>,
     pub description: Option<String>,
@@ -20,42 +20,36 @@ pub struct BookDetailsRow {
     pub updated_at: Option<DateTimeWithTimeZone>,
     pub updated_by_id: Option<Uuid>,
     pub updated_by_name: Option<String>,
-    #[sea_orm(nested)]
+    #[sea_orm(nested, alias = "users")]
     pub user: UserReferenceRow,
-    #[sea_orm(nested)]
+    #[sea_orm(nested, alias = "book_checkouts")]
     pub checkout: Option<BookCheckoutRow>,
 }
 
-#[derive(DerivePartialModel, FromQueryResult, Clone)]
+#[derive(DerivePartialModel, Clone)]
 #[sea_orm(entity = "crate::database::entity::books::Entity")]
 pub struct BookListItemRow {
     pub id: Uuid,
     pub title: String,
-    #[sea_orm(nested)]
+    #[sea_orm(nested, alias = "authors")]
     pub author: BookAuthorRow,
     pub description: Option<String>,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: Option<DateTimeWithTimeZone>,
-    #[sea_orm(nested)]
+    #[sea_orm(nested, alias = "users")]
     pub user: UserReferenceRow,
-    #[sea_orm(nested)]
+    #[sea_orm(nested, alias = "book_checkouts")]
     pub checkout: Option<BookCheckoutRow>,
 }
 
-#[derive(DerivePartialModel, FromQueryResult, Clone)]
+#[derive(DerivePartialModel, Clone)]
 #[sea_orm(entity = "crate::database::entity::book_checkouts::Entity")]
 pub struct BookCheckoutRow {
-    #[sea_orm(from_alias = "checkout_checkout_id")]
     pub checkout_id: Uuid,
-    #[sea_orm(from_alias = "checkout_book_id")]
     pub book_id: Uuid,
-    #[sea_orm(from_alias = "checkout_checked_out_at")]
     pub checked_out_at: DateTimeWithTimeZone,
-    #[sea_orm(from_alias = "checkout_checked_out_by_id")]
     pub checked_out_by_id: Uuid,
-    #[sea_orm(from_alias = "checkout_checked_out_by_name")]
     pub checked_out_by_name: String,
-    #[sea_orm(from_alias = "checkout_returned_at")]
     pub returned_at: Option<DateTimeWithTimeZone>,
 }
 

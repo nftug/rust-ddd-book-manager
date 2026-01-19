@@ -1,9 +1,9 @@
 use application::author::dto::AuthorSummaryDTO;
 use domain::author::values::AuthorReference;
-use sea_orm::{DerivePartialModel, FromQueryResult};
+use sea_orm::DerivePartialModel;
 use uuid::Uuid;
 
-#[derive(DerivePartialModel, FromQueryResult)]
+#[derive(DerivePartialModel)]
 #[sea_orm(entity = "crate::database::entity::authors::Entity")]
 pub struct AuthorSummaryRow {
     pub id: Uuid,
@@ -16,12 +16,10 @@ impl AuthorSummaryRow {
     }
 }
 
-#[derive(DerivePartialModel, FromQueryResult, Clone)]
+#[derive(DerivePartialModel, Clone)]
 #[sea_orm(entity = "crate::database::entity::authors::Entity")]
 pub struct BookAuthorRow {
-    #[sea_orm(from_alias = "author_id")]
     pub id: Uuid,
-    #[sea_orm(from_alias = "author_name")]
     pub name: String,
 }
 

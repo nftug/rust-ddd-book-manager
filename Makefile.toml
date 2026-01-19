@@ -31,14 +31,13 @@ command = "docker"
 args = ["compose", "down"]
 
 [tasks.migrate]
-install_crate = { crate_name = "sea-orm-cli", binary = "sea-orm-cli", test_arg = "--help" }
+install_crate = { crate_name = "sea-orm-cli", version = "2.0.0-rc.28", binary = "sea-orm-cli", test_arg = "--help" }
 dependencies = ["compose-up"]
 extend = "set-env-local"
 command = "sea-orm-cli"
 args = ["migrate", "up", "-u", "${DATABASE_URL}", "-d", "migration"]
 
 [tasks.generate-entity]
-install_crate = { crate_name = "sea-orm-cli", binary = "sea-orm-cli", test_arg = "--help" }
 dependencies = ["before-build"]
 extend = "set-env-local"
 command = "sea-orm-cli"

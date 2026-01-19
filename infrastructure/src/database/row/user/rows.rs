@@ -9,15 +9,13 @@ use domain::{
     shared::error::PersistenceError,
     user::{enums::UserRole, values::UserReference},
 };
-use sea_orm::{DerivePartialModel, FromQueryResult};
+use sea_orm::DerivePartialModel;
 use uuid::Uuid;
 
-#[derive(DerivePartialModel, FromQueryResult, Clone)]
+#[derive(DerivePartialModel, Clone)]
 #[sea_orm(entity = "crate::database::entity::users::Entity")]
 pub struct UserReferenceRow {
-    #[sea_orm(from_alias = "user_id")]
     pub id: Uuid,
-    #[sea_orm(from_alias = "user_name")]
     pub name: String,
 }
 
@@ -34,7 +32,7 @@ impl UserReferenceRow {
     }
 }
 
-#[derive(DerivePartialModel, FromQueryResult)]
+#[derive(DerivePartialModel)]
 #[sea_orm(entity = "crate::database::entity::users::Entity")]
 pub struct UserDetailsDTORow {
     pub id: Uuid,
@@ -55,7 +53,7 @@ impl UserDetailsDTORow {
     }
 }
 
-#[derive(DerivePartialModel, FromQueryResult)]
+#[derive(DerivePartialModel)]
 #[sea_orm(entity = "crate::database::entity::users::Entity")]
 pub struct ActorRow {
     pub id: Uuid,
