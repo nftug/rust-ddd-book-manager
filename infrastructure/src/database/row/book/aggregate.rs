@@ -85,20 +85,23 @@ pub struct AggregatedBookListItem {
 impl AggregatedBookListItem {
     pub fn from_rows(rows: Vec<BookListItemRow>) -> Vec<Self> {
         rows.into_iter()
-            .into_group_map_by(|r| r.id)
-            .into_values()
-            .map(|group| AggregatedBookListItem {
-                row: group[0].clone(),
-                authors: group
-                    .iter()
-                    .map(|r| r.author.clone())
-                    .unique_by(|a| a.id)
-                    .collect(),
-                checkouts: group
-                    .iter()
-                    .filter_map(|r| r.checkout.clone())
-                    .unique_by(|c| c.checkout_id)
-                    .collect(),
+            .chunk_by(|r| r.id)
+            .into_iter()
+            .map(|(_, group)| {
+                let group: Vec<BookListItemRow> = group.collect();
+                AggregatedBookListItem {
+                    row: group[0].clone(),
+                    authors: group
+                        .iter()
+                        .map(|r| r.author.clone())
+                        .unique_by(|a| a.id)
+                        .collect(),
+                    checkouts: group
+                        .iter()
+                        .filter_map(|r| r.checkout.clone())
+                        .unique_by(|c| c.checkout_id)
+                        .collect(),
+                }
             })
             .collect()
     }

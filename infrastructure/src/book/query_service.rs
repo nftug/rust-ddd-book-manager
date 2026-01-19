@@ -9,7 +9,6 @@ use sea_orm::{
     ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, QueryTrait,
     Select,
 };
-use uuid::Uuid;
 
 use crate::database::{
     ConnectionPool,
@@ -81,21 +80,22 @@ impl BookQueryService for BookQueryServiceImpl {
             .await
             .map_err(log_db_error)?;
 
-        let book_ids: Vec<Uuid> = id_db_query
-            .order_by_desc(books::Column::CreatedAt)
-            .into_tuple()
-            .paginate(self.db.inner_ref(), query.page_size)
-            .fetch_page(query.page - 1)
-            .await
-            .map_err(log_db_error)?;
-
         let rows = books::Entity::find()
             .inner_join(authors::Entity)
             .inner_join(users::Entity)
             .left_join(book_checkouts::Entity)
-            .filter(books::Column::Id.is_in(book_ids))
+            .filter(
+                books::Column::Id.in_subquery(
+                    id_db_query
+                        .order_by_desc(books::Column::CreatedAt)
+                        .offset((query.page - 1) * query.page_size)
+                        .limit(query.page_size)
+                        .into_query(),
+                ),
+            )
             .order_by_desc(books::Column::CreatedAt)
             .order_by_asc(book_authors::Column::OrderIndex)
+            .order_by_id_desc() // chunk_byによるidでのグルーピングを安定化させる
             .into_partial_model::<BookListItemRow>()
             .all(self.db.inner_ref())
             .await
@@ -122,6 +122,7 @@ impl BookQueryService for BookQueryServiceImpl {
     ) -> Result<CheckoutHistoryListDTO, PersistenceError> {
         let db_query = book_checkouts::Entity::find()
             .filter(book_checkouts::Column::BookId.eq(identity.book_id.raw()));
+
         let total_count = db_query
             .clone()
             .select_only()
