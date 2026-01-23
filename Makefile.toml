@@ -44,6 +44,8 @@ command = "sea-orm-cli"
 args = [
     "generate",
     "entity",
+    "--entity-format",
+    "dense",
     "-u",
     "${DATABASE_URL}",
     "-o",
