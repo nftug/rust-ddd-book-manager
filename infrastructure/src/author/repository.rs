@@ -4,11 +4,11 @@ use domain::{
     author::{entity::Author, interface::AuthorRepository, values::*},
     shared::error::PersistenceError,
 };
-use sea_orm::{ActiveValue::Set, ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter};
+use sea_orm::{ActiveValue::Set, EntityTrait};
 
 use crate::{
     database::{ConnectionPool, entity::authors, log_db_error},
-    macros::{audit_defaults, hydrate_audit},
+    macros::{audit_defaults, hydrate_audit, update_on_conflict},
 };
 
 #[derive(new)]
@@ -37,24 +37,14 @@ impl AuthorRepository for AuthorRepositoryImpl {
             ..audit_defaults!(authors::ActiveModel, author.audit())
         };
 
-        let exists = authors::Entity::find()
-            .filter(authors::Column::Id.eq(author.audit().raw_id()))
-            .count(self.db.inner_ref())
+        authors::Entity::insert(active_model)
+            .on_conflict(update_on_conflict!(
+                authors::Column,
+                [authors::Column::Name]
+            ))
+            .exec(self.db.inner_ref())
             .await
-            .map_err(log_db_error)?
-            > 0;
-
-        if exists {
-            authors::Entity::update(active_model)
-                .exec(self.db.inner_ref())
-                .await
-                .map_err(log_db_error)?;
-        } else {
-            authors::Entity::insert(active_model)
-                .exec(self.db.inner_ref())
-                .await
-                .map_err(log_db_error)?;
-        }
+            .map_err(log_db_error)?;
 
         Ok(())
     }

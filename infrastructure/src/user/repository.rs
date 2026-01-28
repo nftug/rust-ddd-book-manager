@@ -6,11 +6,11 @@ use domain::{
     shared::error::PersistenceError,
     user::{entity::User, enums::UserRole, interface::UserRepository, values::*},
 };
-use sea_orm::{ActiveValue::Set, ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter};
+use sea_orm::{ActiveValue::Set, EntityTrait};
 
 use crate::{
     database::{ConnectionPool, entity::users, log_db_error},
-    macros::{audit_defaults, hydrate_audit},
+    macros::{audit_defaults, hydrate_audit, update_on_conflict},
 };
 
 #[derive(new)]
@@ -49,24 +49,18 @@ impl UserRepository for UserRepositoryImpl {
             ..audit_defaults!(users::ActiveModel, user.audit())
         };
 
-        let exists = users::Entity::find()
-            .filter(users::Column::Id.eq(user.audit().raw_id()))
-            .count(self.db.inner_ref())
+        users::Entity::insert(active_model)
+            .on_conflict(update_on_conflict!(
+                users::Column,
+                [
+                    users::Column::Name,
+                    users::Column::Email,
+                    users::Column::Role
+                ]
+            ))
+            .exec(self.db.inner_ref())
             .await
-            .map_err(log_db_error)?
-            > 0;
-
-        if exists {
-            users::Entity::update(active_model)
-                .exec(self.db.inner_ref())
-                .await
-                .map_err(log_db_error)?;
-        } else {
-            users::Entity::insert(active_model)
-                .exec(self.db.inner_ref())
-                .await
-                .map_err(log_db_error)?;
-        }
+            .map_err(log_db_error)?;
 
         Ok(())
     }

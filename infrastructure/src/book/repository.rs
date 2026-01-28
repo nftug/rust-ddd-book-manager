@@ -5,8 +5,7 @@ use domain::{
     shared::error::PersistenceError,
 };
 use sea_orm::{
-    ActiveValue::Set, ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder,
-    TransactionTrait,
+    ActiveValue::Set, ColumnTrait, EntityTrait, QueryFilter, QueryOrder, TransactionTrait,
 };
 
 use crate::{
@@ -16,7 +15,7 @@ use crate::{
         log_db_error,
         row::book::{aggregate::AggregatedBookDetails, rows::BookDetailsRow},
     },
-    macros::audit_defaults,
+    macros::{audit_defaults, update_on_conflict},
 };
 
 #[derive(new)]
@@ -53,24 +52,19 @@ impl BookRepository for BookRepositoryImpl {
             ..audit_defaults!(books::ActiveModel, book.audit())
         };
 
-        let exists = books::Entity::find()
-            .filter(books::Column::Id.eq(book.audit().raw_id()))
-            .count(&txn)
+        books::Entity::insert(book_active_model)
+            .on_conflict(update_on_conflict!(
+                books::Column,
+                [
+                    books::Column::Title,
+                    books::Column::Isbn,
+                    books::Column::Description,
+                    books::Column::OwnerId
+                ]
+            ))
+            .exec(&txn)
             .await
-            .map_err(log_db_error)?
-            > 0;
-
-        if exists {
-            books::Entity::update(book_active_model)
-                .exec(&txn)
-                .await
-                .map_err(log_db_error)?;
-        } else {
-            books::Entity::insert(book_active_model)
-                .exec(&txn)
-                .await
-                .map_err(log_db_error)?;
-        }
+            .map_err(log_db_error)?;
 
         // Upsert book authors
         let book_authors = book

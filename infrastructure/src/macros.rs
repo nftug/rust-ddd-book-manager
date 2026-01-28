@@ -59,7 +59,21 @@ macro_rules! audit_defaults {
     };
 }
 
+macro_rules! update_on_conflict {
+    ($column:ty, [$($update_col:path),+ $(,)?]) => {
+        sea_orm::sea_query::OnConflict::column(<$column>::Id)
+            .update_columns([
+                $($update_col),+,
+                <$column>::UpdatedAt,
+                <$column>::UpdatedById,
+                <$column>::UpdatedByName,
+            ])
+            .to_owned()
+    };
+}
+
 pub(crate) use audit_defaults;
 pub(crate) use hydrate_audit;
 pub(crate) use hydrate_audit_dto;
 pub(crate) use hydrate_audit_summary_dto;
+pub(crate) use update_on_conflict;
