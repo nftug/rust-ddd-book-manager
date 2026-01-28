@@ -17,6 +17,12 @@ pub struct BookListQueryDTO {
     pub checked_out: Option<bool>,
     #[garde(skip)]
     pub checked_out_to_id: Option<Uuid>,
+    #[garde(skip)]
+    pub search: Option<String>,
+    #[garde(skip)]
+    pub title: Option<String>,
+    #[garde(skip)]
+    pub author_name: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Validate, schemars::JsonSchema)]

@@ -6,8 +6,8 @@ use async_trait::async_trait;
 use derive_new::new;
 use domain::{audit::Actor, auth::permission::EntityPermission, shared::error::PersistenceError};
 use sea_orm::{
-    ColumnTrait, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect, QueryTrait,
-    Select,
+    ColumnTrait, Condition, EntityTrait, PaginatorTrait, QueryFilter, QueryOrder, QuerySelect,
+    QueryTrait, Select, prelude::Expr,
 };
 
 use crate::database::{
@@ -71,6 +71,22 @@ impl BookQueryService for BookQueryServiceImpl {
                             .filter(book_checkouts::Column::CheckedOutById.eq(user_id))
                             .into_query(),
                     ),
+                )
+            })
+            .apply_if(query.title.as_ref(), |q, title| {
+                q.filter(books::Column::Title.ilike(format!("%{}%", title)))
+            })
+            .apply_if(query.author_name.as_ref(), |q, author_name| {
+                q.filter(find_by_author_name_expression(author_name))
+            })
+            .apply_if(query.search.as_ref(), |q, search| {
+                let pattern = format!("%{}%", search);
+                q.filter(
+                    Condition::any()
+                        .add(books::Column::Title.ilike(&pattern))
+                        .add(books::Column::Isbn.ilike(&pattern))
+                        .add(books::Column::Description.ilike(&pattern))
+                        .add(find_by_author_name_expression(search)),
                 )
             });
 
@@ -162,4 +178,16 @@ fn active_checkout_ids_query() -> Select<book_checkouts::Entity> {
         .select_only()
         .column(book_checkouts::Column::BookId)
         .filter(book_checkouts::Column::ReturnedAt.is_null())
+}
+
+fn find_by_author_name_expression(name: &str) -> Expr {
+    let pattern = format!("%{}%", name);
+    books::Column::Id.in_subquery(
+        book_authors::Entity::find()
+            .inner_join(authors::Entity)
+            .select_only()
+            .column(book_authors::Column::BookId)
+            .filter(authors::Column::Name.ilike(&pattern))
+            .into_query(),
+    )
 }
