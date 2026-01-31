@@ -53,15 +53,7 @@ impl BookRepository for BookRepositoryImpl {
         };
 
         books::Entity::insert(book_active_model)
-            .on_conflict(update_on_conflict!(
-                books::Column,
-                [
-                    books::Column::Title,
-                    books::Column::Isbn,
-                    books::Column::Description,
-                    books::Column::OwnerId
-                ]
-            ))
+            .on_conflict(update_on_conflict!(books::Column))
             .exec(&txn)
             .await
             .map_err(log_db_error)?;

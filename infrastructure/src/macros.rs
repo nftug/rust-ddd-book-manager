@@ -60,14 +60,13 @@ macro_rules! audit_defaults {
 }
 
 macro_rules! update_on_conflict {
-    ($column:ty, [$($update_col:path),+ $(,)?]) => {
+    ($column:ty) => {
         sea_orm::sea_query::OnConflict::column(<$column>::Id)
-            .update_columns([
-                $($update_col),+,
-                <$column>::UpdatedAt,
-                <$column>::UpdatedById,
-                <$column>::UpdatedByName,
-            ])
+            .update_columns(
+                <$column as sea_orm::Iterable>::iter()
+                    .filter(|col| !matches!(col, <$column>::Id))
+                    .collect::<Vec<_>>(),
+            )
             .to_owned()
     };
 }

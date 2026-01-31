@@ -38,10 +38,7 @@ impl AuthorRepository for AuthorRepositoryImpl {
         };
 
         authors::Entity::insert(active_model)
-            .on_conflict(update_on_conflict!(
-                authors::Column,
-                [authors::Column::Name]
-            ))
+            .on_conflict(update_on_conflict!(authors::Column))
             .exec(self.db.inner_ref())
             .await
             .map_err(log_db_error)?;

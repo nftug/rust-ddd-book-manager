@@ -50,14 +50,7 @@ impl UserRepository for UserRepositoryImpl {
         };
 
         users::Entity::insert(active_model)
-            .on_conflict(update_on_conflict!(
-                users::Column,
-                [
-                    users::Column::Name,
-                    users::Column::Email,
-                    users::Column::Role
-                ]
-            ))
+            .on_conflict(update_on_conflict!(users::Column))
             .exec(self.db.inner_ref())
             .await
             .map_err(log_db_error)?;
