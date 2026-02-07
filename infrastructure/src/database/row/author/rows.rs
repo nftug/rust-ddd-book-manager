@@ -3,27 +3,14 @@ use domain::author::values::AuthorReference;
 use sea_orm::DerivePartialModel;
 use uuid::Uuid;
 
-#[derive(DerivePartialModel)]
-#[sea_orm(entity = "crate::database::entity::authors::Entity")]
-pub struct AuthorSummaryRow {
-    pub id: Uuid,
-    pub name: String,
-}
-
-impl AuthorSummaryRow {
-    pub fn to_domain(self) -> AuthorReference {
-        AuthorReference::hydrate(self.id, self.name)
-    }
-}
-
 #[derive(DerivePartialModel, Clone)]
 #[sea_orm(entity = "crate::database::entity::authors::Entity")]
-pub struct BookAuthorRow {
+pub struct AuthorReferenceRow {
     pub id: Uuid,
     pub name: String,
 }
 
-impl BookAuthorRow {
+impl AuthorReferenceRow {
     pub fn to_domain(self) -> AuthorReference {
         AuthorReference::hydrate(self.id, self.name)
     }

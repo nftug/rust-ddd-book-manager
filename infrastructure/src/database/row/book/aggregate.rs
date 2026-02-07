@@ -8,7 +8,7 @@ use itertools::Itertools;
 
 use crate::{
     database::row::{
-        author::BookAuthorRow,
+        AuthorReferenceRow,
         book::rows::{BookDetailsRow, BookListItemRow},
         rows::BookCheckoutRow,
     },
@@ -17,7 +17,7 @@ use crate::{
 
 pub struct AggregatedBookDetails {
     pub row: BookDetailsRow,
-    pub authors: Vec<BookAuthorRow>,
+    pub authors: Vec<AuthorReferenceRow>,
     pub checkouts: Vec<BookCheckoutRow>,
 }
 
@@ -78,7 +78,7 @@ impl AggregatedBookDetails {
 
 pub struct AggregatedBookListItem {
     pub row: BookListItemRow,
-    pub authors: Vec<BookAuthorRow>,
+    pub authors: Vec<AuthorReferenceRow>,
     pub checkouts: Vec<BookCheckoutRow>,
 }
 

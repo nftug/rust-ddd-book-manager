@@ -9,7 +9,7 @@ use domain::{
 };
 use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
 
-use crate::database::{ConnectionPool, entity::authors, log_db_error, row::AuthorSummaryRow};
+use crate::database::{ConnectionPool, entity::authors, log_db_error, row::AuthorReferenceRow};
 
 #[derive(new)]
 pub struct AuthorDomainQueryServiceImpl {
@@ -30,7 +30,7 @@ impl AuthorDomainQueryService for AuthorDomainQueryServiceImpl {
 
         let models = authors::Entity::find()
             .filter(authors::Column::Name.is_in(raw_names))
-            .into_partial_model::<AuthorSummaryRow>()
+            .into_partial_model::<AuthorReferenceRow>()
             .all(self.db.inner_ref())
             .await
             .map_err(log_db_error)?;

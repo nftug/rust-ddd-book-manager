@@ -66,8 +66,7 @@ impl BookRepository for BookRepositoryImpl {
                 book_id: Set(book.audit().raw_id()),
                 author_id: Set(author_ref.raw_id()),
                 order_index: Set(author_ref.order_index() as i32),
-            })
-            .collect::<Vec<_>>();
+            });
 
         book_authors::Entity::delete_many()
             .filter(book_authors::Column::BookId.eq(book.audit().raw_id()))

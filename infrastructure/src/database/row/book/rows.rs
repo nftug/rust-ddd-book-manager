@@ -3,7 +3,7 @@ use domain::{book::values::BookCheckout, user::values::UserReference};
 use sea_orm::{DerivePartialModel, prelude::DateTimeWithTimeZone};
 use uuid::Uuid;
 
-use crate::database::row::{author::BookAuthorRow, user::UserReferenceRow};
+use crate::database::row::{AuthorReferenceRow, user::UserReferenceRow};
 
 #[derive(DerivePartialModel, Clone)]
 #[sea_orm(entity = "crate::database::entity::books::Entity")]
@@ -11,7 +11,7 @@ pub struct BookDetailsRow {
     pub id: Uuid,
     pub title: String,
     #[sea_orm(nested, alias = "authors")]
-    pub author: BookAuthorRow,
+    pub author: AuthorReferenceRow,
     pub isbn: Option<String>,
     pub description: Option<String>,
     pub created_at: DateTimeWithTimeZone,
@@ -32,7 +32,7 @@ pub struct BookListItemRow {
     pub id: Uuid,
     pub title: String,
     #[sea_orm(nested, alias = "authors")]
-    pub author: BookAuthorRow,
+    pub author: AuthorReferenceRow,
     pub description: Option<String>,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: Option<DateTimeWithTimeZone>,
