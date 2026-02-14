@@ -20,7 +20,7 @@ API は Axum、永続化は SeaORM、DB は PostgreSQL、認証は Keycloak（OI
 
 ## 前提
 
-- Rust（Edition 2024 を使用）
+- Rust（1.93以上）
 - Docker / Docker Compose
 
 任意（開発が楽になります）
@@ -117,6 +117,35 @@ curl -sS -X POST "http://localhost:8080/api/books/" \
 - `OIDC_AUTHORITY`
 - `OIDC_CLIENT_ID`
 - （任意）`OIDC_AUDIENCE`（設定すると `aud` 検証が有効になります）
+
+## Dockerによるデプロイ
+
+デプロイ用のイメージを [Dockerfile](Dockerfile) でビルドできます。
+
+ビルド：
+
+```sh
+docker build -t book-manager-api:latest .
+```
+
+起動（例）：
+
+```sh
+docker run --rm -p 8080:8080 \
+  -e PORT=8080 \
+  -e DATABASE_HOST=host.docker.internal \
+  -e DATABASE_PORT=5432 \
+  -e DATABASE_USERNAME=book-manager \
+  -e DATABASE_PASSWORD=password \
+  -e DATABASE_NAME=book-db \
+  -e OIDC_AUTHORITY=http://host.docker.internal:8081/realms/master \
+  -e OIDC_CLIENT_ID=book-manager \
+  book-manager-api:latest
+```
+
+注意：
+
+- DB の migration はコンテナ起動時に自動実行しません。事前に `cargo make migrate` 等で適用してください。
 
 ## よく使う開発コマンド
 
