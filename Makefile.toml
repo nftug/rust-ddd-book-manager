@@ -56,7 +56,7 @@ args = [
 extend = "set-env-local"
 dependencies = ["before-build"]
 command = "cargo"
-args = ["watch", "-x", "run -p api", "${@}"]
+args = ["watch", "-i", "openapi.json", "-x", "run -p api", "${@}"]
 
 [tasks.run-release]
 extend = "set-env-local"

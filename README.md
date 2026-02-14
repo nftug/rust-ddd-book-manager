@@ -42,9 +42,9 @@ cargo install cargo-make cargo-watch
 cargo make run
 ```
 
-- API: http://localhost:8080
-- PostgreSQL: localhost:5432
-- Keycloak: http://localhost:8081（admin / admin）
+- API: `http://localhost:8080/api`
+- PostgreSQL: `localhost:5432`
+- Keycloak: `http://localhost:8081`（admin / admin）
 
 停止：
 
@@ -56,8 +56,10 @@ cargo make compose-down
 
 debug ビルド（通常の `cargo run` 相当）では API ドキュメントが有効です。
 
-- ReDoc: http://localhost:8080/api/doc
-- OpenAPI JSON: http://localhost:8080/api/doc/openapi.json
+- ReDoc: `http://localhost:8080/api/doc`
+- OpenAPI JSON: `http://localhost:8080/api/doc/openapi.json`
+
+debug ビルドでは起動時に OpenAPI スキーマをリポジトリルートの [openapi.json](/openapi.json) に自動出力します。
 
 ※ release ビルドではドキュメントルートは無効です。
 

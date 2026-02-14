@@ -1,0 +1,869 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Book Manager API",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/api/books": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "author_name",
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "checked_out",
+            "schema": {
+              "type": [
+                "boolean",
+                "null"
+              ]
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "checked_out_to_id",
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uuid"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "owner_id",
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ],
+              "format": "uuid"
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 1,
+              "minimum": 1
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 10,
+              "minimum": 1
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "title",
+            "schema": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginationDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Books"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBookRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EntityCreationDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/books/{book_id}": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "book_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BookId"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BookDetailsDTO"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "book_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BookId"
+            },
+            "style": "simple"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBookRequestDTO"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "no content"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "book_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BookId"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "no content"
+          }
+        }
+      }
+    },
+    "/api/books/{book_id}/checkouts": {
+      "get": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "book_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BookId"
+            },
+            "style": "simple"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 1,
+              "minimum": 1
+            },
+            "style": "form"
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "schema": {
+              "type": "integer",
+              "format": "uint64",
+              "default": 10,
+              "minimum": 1
+            },
+            "style": "form"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaginationDTO2"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "book_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BookId"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "no content"
+          }
+        }
+      }
+    },
+    "/api/books/{book_id}/return": {
+      "post": {
+        "tags": [
+          "Books"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "book_id",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/BookId"
+            },
+            "style": "simple"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "no content"
+          }
+        }
+      }
+    },
+    "/api/users/me": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDetailsDTO"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "openIdConnect",
+        "openIdConnectUrl": "http://localhost:8081/realms/master/.well-known/openid-configuration",
+        "description": "OpenID Connect discovery endpoint"
+      }
+    },
+    "schemas": {
+      "AuditDTO": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/UserReferenceDTO"
+          },
+          "permission": {
+            "$ref": "#/components/schemas/PermissionDTO"
+          },
+          "updatedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "updatedBy": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/UserReferenceDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "createdBy",
+          "createdAt",
+          "permission"
+        ]
+      },
+      "AuditSummaryDTO": {
+        "type": "object",
+        "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "permission": {
+            "$ref": "#/components/schemas/PermissionDTO"
+          },
+          "updatedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "createdAt",
+          "permission"
+        ]
+      },
+      "AuthorSummaryDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "BookCheckoutDTO": {
+        "type": "object",
+        "properties": {
+          "checkedOutAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "checkedOutTo": {
+            "$ref": "#/components/schemas/UserReferenceDTO"
+          },
+          "checkoutId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "checkoutId",
+          "checkedOutAt",
+          "checkedOutTo"
+        ]
+      },
+      "BookCheckoutWithReturnDTO": {
+        "type": "object",
+        "properties": {
+          "checkedOutAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "checkedOutTo": {
+            "$ref": "#/components/schemas/UserReferenceDTO"
+          },
+          "checkoutId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "returnedAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "checkoutId",
+          "checkedOutAt",
+          "checkedOutTo"
+        ]
+      },
+      "BookDetailsDTO": {
+        "type": "object",
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditDTO"
+          },
+          "authors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthorSummaryDTO"
+            }
+          },
+          "checkout": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/BookCheckoutDTO"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "isbn": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserReferenceDTO"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "authors",
+          "owner",
+          "audit"
+        ]
+      },
+      "BookId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "BookIdentity": {
+        "type": "object",
+        "properties": {
+          "book_id": {
+            "$ref": "#/components/schemas/BookId"
+          }
+        },
+        "required": [
+          "book_id"
+        ]
+      },
+      "BookListItemDTO": {
+        "type": "object",
+        "properties": {
+          "audit": {
+            "$ref": "#/components/schemas/AuditSummaryDTO"
+          },
+          "authors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AuthorSummaryDTO"
+            }
+          },
+          "checkedOut": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserReferenceDTO"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "authors",
+          "owner",
+          "checkedOut",
+          "audit"
+        ]
+      },
+      "BookListQueryDTO": {
+        "type": "object",
+        "properties": {
+          "author_name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "checked_out": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "checked_out_to_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "owner_id": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "page": {
+            "type": "integer",
+            "format": "uint64",
+            "default": 1,
+            "minimum": 1
+          },
+          "page_size": {
+            "type": "integer",
+            "format": "uint64",
+            "default": 10,
+            "minimum": 1
+          },
+          "search": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "CheckoutHistoryQueryDTO": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "uint64",
+            "default": 1,
+            "minimum": 1
+          },
+          "page_size": {
+            "type": "integer",
+            "format": "uint64",
+            "default": 10,
+            "minimum": 1
+          }
+        }
+      },
+      "CreateBookRequestDTO": {
+        "type": "object",
+        "properties": {
+          "authorNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isbn": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "authorNames"
+        ]
+      },
+      "EntityCreationDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "id"
+        ]
+      },
+      "PaginationDTO": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookListItemDTO"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "page",
+          "pageSize",
+          "totalCount",
+          "items"
+        ]
+      },
+      "PaginationDTO2": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BookCheckoutWithReturnDTO"
+            }
+          },
+          "page": {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0
+          },
+          "totalCount": {
+            "type": "integer",
+            "format": "uint64",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "page",
+          "pageSize",
+          "totalCount",
+          "items"
+        ]
+      },
+      "PermissionDTO": {
+        "type": "object",
+        "properties": {
+          "canDelete": {
+            "type": "boolean"
+          },
+          "canUpdate": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "canUpdate",
+          "canDelete"
+        ]
+      },
+      "UpdateBookRequestDTO": {
+        "type": "object",
+        "properties": {
+          "authorNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "isbn": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "authorNames"
+        ]
+      },
+      "UserDetailsDTO": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "$ref": "#/components/schemas/UserRoleDTO"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "role"
+        ]
+      },
+      "UserReferenceDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "UserRoleDTO": {
+        "type": "string",
+        "enum": [
+          "admin",
+          "regular",
+          "system"
+        ]
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Books",
+      "description": "Book management endpoints"
+    },
+    {
+      "name": "Users",
+      "description": "User management endpoints"
+    }
+  ]
+}

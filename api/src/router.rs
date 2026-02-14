@@ -9,6 +9,8 @@ use infrastructure::config::OidcConfig;
 use {
     aide::{openapi::*, redoc::Redoc},
     axum::{Extension, http::header::CONTENT_TYPE, response::IntoResponse, routing::get},
+    std::{fs, path::Path},
+    tracing::info,
 };
 
 pub mod book;
@@ -21,7 +23,7 @@ async fn serve_api(Extension(api): Extension<OpenApi>) -> impl IntoResponse {
 }
 
 #[cfg(debug_assertions)]
-fn build_openapi(oidc_config: &OidcConfig) -> OpenApi {
+fn build_openapi_schema(oidc_config: &OidcConfig) -> OpenApi {
     let tags = vec![
         Tag {
             name: "Books".to_string(),
@@ -66,11 +68,11 @@ fn build_openapi(oidc_config: &OidcConfig) -> OpenApi {
 
 #[allow(unused)]
 pub fn build_router(oidc_config: &OidcConfig) -> Router<AppRegistry> {
-    let api_router = ApiRouter::new().nest("/api", book_router().merge(user_router()));
+    let api_router = build_api_router();
 
     #[cfg(debug_assertions)]
     {
-        let mut api = build_openapi(oidc_config);
+        let mut api = build_openapi_schema(oidc_config);
         let api_router = api_router.nest(
             "/api",
             ApiRouter::new()
@@ -85,4 +87,37 @@ pub fn build_router(oidc_config: &OidcConfig) -> Router<AppRegistry> {
     {
         Router::from(api_router)
     }
+}
+
+#[cfg(debug_assertions)]
+pub fn export_openapi_schema(
+    oidc_config: &OidcConfig,
+    target_dir_path: &Path,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let api_router = build_api_router();
+    let mut schema = build_openapi_schema(oidc_config);
+    let _ = api_router.finish_api(&mut schema);
+
+    let body = serde_json::to_string_pretty(&schema)?;
+
+    let output_path = target_dir_path.join("openapi.json");
+
+    if let Ok(existing) = fs::read_to_string(&output_path)
+        && existing == body
+    {
+        info!(
+            "OpenAPI schema is unchanged; skip writing {}",
+            output_path.display()
+        );
+        return Ok(());
+    }
+
+    fs::write(&output_path, body)?;
+    info!("Exported OpenAPI schema to {}", output_path.display());
+
+    Ok(())
+}
+
+fn build_api_router() -> ApiRouter<AppRegistry> {
+    ApiRouter::new().nest("/api", book_router().merge(user_router()))
 }
