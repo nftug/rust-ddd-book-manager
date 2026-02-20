@@ -2,10 +2,7 @@ use std::sync::Arc;
 
 use domain::{audit::Clock, book::interface::BookRepository};
 
-use crate::{
-    author::service::AuthorsFactoryService,
-    book::{command::*, interface::*, query::*},
-};
+use crate::book::{command::*, interface::*, query::*};
 
 pub struct BookRegistry {
     create_book: Arc<CreateBookService>,
@@ -22,19 +19,10 @@ impl BookRegistry {
     pub fn new(
         repository: Arc<dyn BookRepository>,
         query_service: Arc<dyn BookQueryService>,
-        authors_factory_service: Arc<AuthorsFactoryService>,
         clock: Arc<dyn Clock>,
     ) -> Self {
-        let create_book = CreateBookService::new(
-            clock.clone(),
-            repository.clone(),
-            authors_factory_service.clone(),
-        );
-        let update_book = UpdateBookService::new(
-            clock.clone(),
-            repository.clone(),
-            authors_factory_service.clone(),
-        );
+        let create_book = CreateBookService::new(clock.clone(), repository.clone());
+        let update_book = UpdateBookService::new(clock.clone(), repository.clone());
         let delete_book = DeleteBookService::new(clock.clone(), repository.clone());
         let checkout_book = CheckoutBookService::new(clock.clone(), repository.clone());
         let return_book = ReturnBookService::new(clock.clone(), repository.clone());

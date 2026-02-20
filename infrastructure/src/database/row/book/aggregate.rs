@@ -1,15 +1,16 @@
 use application::book::dto::{BookDetailsDTO, BookListItemDTO};
 use domain::{
     auth::permission::Permission,
-    author::values::AuthorReference,
-    book::{entity::Book, values::BookId},
+    book::{
+        entity::Book,
+        values::{BookAuthorName, BookId},
+    },
 };
 use itertools::Itertools;
 
 use crate::{
     database::row::{
-        AuthorReferenceRow,
-        book::rows::{BookDetailsRow, BookListItemRow},
+        book::rows::{BookAuthorReferenceRow, BookDetailsRow, BookListItemRow},
         rows::BookCheckoutRow,
     },
     macros::{hydrate_audit, hydrate_audit_dto, hydrate_audit_summary_dto},
@@ -17,7 +18,7 @@ use crate::{
 
 pub struct AggregatedBookDetails {
     pub row: BookDetailsRow,
-    pub authors: Vec<AuthorReferenceRow>,
+    pub authors: Vec<BookAuthorReferenceRow>,
     pub checkouts: Vec<BookCheckoutRow>,
 }
 
@@ -28,7 +29,7 @@ impl AggregatedBookDetails {
             authors: rows
                 .iter()
                 .map(|r| r.author.clone())
-                .unique_by(|a| a.id)
+                .unique_by(|a| a.order_index)
                 .collect(),
             checkouts: rows
                 .iter()
@@ -42,7 +43,12 @@ impl AggregatedBookDetails {
         BookDetailsDTO {
             id: self.row.id,
             title: self.row.title,
-            authors: self.authors.into_iter().map(|a| a.to_dto()).collect(),
+            authors: self
+                .authors
+                .into_iter()
+                .unique_by(|a| a.order_index)
+                .map(|a| a.name)
+                .collect(),
             isbn: self.row.isbn,
             description: self.row.description,
             owner: self.row.user.to_dto(),
@@ -57,11 +63,10 @@ impl AggregatedBookDetails {
     }
 
     pub fn to_entity(self) -> Book {
-        let authors_with_index: Vec<(AuthorReference, usize)> = self
+        let authors_with_index: Vec<(BookAuthorName, usize)> = self
             .authors
             .into_iter()
-            .enumerate()
-            .map(|(idx, a)| (a.to_domain(), idx))
+            .map(|a| (a.to_domain(), a.order_index as usize))
             .collect();
 
         Book::hydrate(
@@ -78,7 +83,7 @@ impl AggregatedBookDetails {
 
 pub struct AggregatedBookListItem {
     pub row: BookListItemRow,
-    pub authors: Vec<AuthorReferenceRow>,
+    pub authors: Vec<BookAuthorReferenceRow>,
     pub checkouts: Vec<BookCheckoutRow>,
 }
 
@@ -94,7 +99,7 @@ impl AggregatedBookListItem {
                     authors: group
                         .iter()
                         .map(|r| r.author.clone())
-                        .unique_by(|a| a.id)
+                        .unique_by(|a| a.order_index)
                         .collect(),
                     checkouts: group
                         .iter()
@@ -110,7 +115,7 @@ impl AggregatedBookListItem {
         BookListItemDTO {
             id: self.row.id,
             title: self.row.title,
-            authors: self.authors.into_iter().map(|a| a.to_dto()).collect(),
+            authors: self.authors.into_iter().map(|a| a.name).collect(),
             owner: self.row.user.to_dto(),
             checked_out: self.checkouts.into_iter().any(|c| c.returned_at.is_none()),
             audit: hydrate_audit_summary_dto!(self.row, permission),

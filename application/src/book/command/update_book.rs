@@ -3,12 +3,10 @@ use std::sync::Arc;
 use derive_new::new;
 use domain::{
     audit::{Actor, AuditContext, Clock},
-    author::values::AuthorName,
-    book::{interface::BookRepository, values::BookAuthorList},
+    book::interface::BookRepository,
 };
 
 use crate::{
-    author::service::AuthorsFactoryService,
     book::dto::{BookIdentity, UpdateBookRequestDTO},
     shared::error::ApplicationError,
 };
@@ -17,7 +15,6 @@ use crate::{
 pub struct UpdateBookService {
     clock: Arc<dyn Clock>,
     book_repository: Arc<dyn BookRepository>,
-    authors_factory_service: Arc<AuthorsFactoryService>,
 }
 
 impl UpdateBookService {
@@ -35,21 +32,10 @@ impl UpdateBookService {
             .await?
             .ok_or(ApplicationError::NotFound)?;
 
-        let author_names = request
-            .author_names
-            .iter()
-            .map(|name| name.clone().try_into())
-            .collect::<Result<Vec<AuthorName>, _>>()?;
-
-        let author_refs = self
-            .authors_factory_service
-            .ensure_authors_exist(&context, &author_names)
-            .await?;
-
         book.update(
             &context,
             request.title.clone().try_into()?,
-            BookAuthorList::try_new(author_names, author_refs)?,
+            request.author_names.clone().try_into()?,
             request.isbn.clone().try_into()?,
             request.description.clone().try_into()?,
         )?;

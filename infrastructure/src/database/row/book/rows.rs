@@ -1,17 +1,20 @@
 use application::{book::dto::BookCheckoutDTO, shared::UserReferenceDTO};
-use domain::{book::values::BookCheckout, user::values::UserReference};
+use domain::{
+    book::values::{BookAuthorName, BookCheckout},
+    user::values::UserReference,
+};
 use sea_orm::{DerivePartialModel, prelude::DateTimeWithTimeZone};
 use uuid::Uuid;
 
-use crate::database::row::{AuthorReferenceRow, user::UserReferenceRow};
+use crate::database::row::user::UserReferenceRow;
 
 #[derive(DerivePartialModel, Clone)]
 #[sea_orm(entity = "crate::database::entity::books::Entity")]
 pub struct BookDetailsRow {
     pub id: Uuid,
     pub title: String,
-    #[sea_orm(nested, alias = "authors")]
-    pub author: AuthorReferenceRow,
+    #[sea_orm(nested, alias = "book_authors")]
+    pub author: BookAuthorReferenceRow,
     pub isbn: Option<String>,
     pub description: Option<String>,
     pub created_at: DateTimeWithTimeZone,
@@ -31,8 +34,8 @@ pub struct BookDetailsRow {
 pub struct BookListItemRow {
     pub id: Uuid,
     pub title: String,
-    #[sea_orm(nested, alias = "authors")]
-    pub author: AuthorReferenceRow,
+    #[sea_orm(nested, alias = "book_authors")]
+    pub author: BookAuthorReferenceRow,
     pub description: Option<String>,
     pub created_at: DateTimeWithTimeZone,
     pub updated_at: Option<DateTimeWithTimeZone>,
@@ -72,5 +75,18 @@ impl BookCheckoutRow {
                 name: self.checked_out_by_name,
             },
         }
+    }
+}
+
+#[derive(DerivePartialModel, Clone)]
+#[sea_orm(entity = "crate::database::entity::book_authors::Entity")]
+pub struct BookAuthorReferenceRow {
+    pub name: String,
+    pub order_index: i32,
+}
+
+impl BookAuthorReferenceRow {
+    pub fn to_domain(&self) -> BookAuthorName {
+        BookAuthorName::hydrate(self.name.clone())
     }
 }

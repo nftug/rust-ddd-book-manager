@@ -1,11 +1,8 @@
 use std::sync::Arc;
 
-use application::{
-    author::registry::AuthorServiceRegistry, book::BookRegistry, user::UserRegistry,
-};
+use application::{book::BookRegistry, user::UserRegistry};
 use domain::audit::{Actor, Clock, clock::SystemClock};
 use infrastructure::{
-    author::{AuthorDomainQueryServiceImpl, AuthorRepositoryImpl},
     book::{BookQueryServiceImpl, BookRepositoryImpl},
     config::AppConfig,
     database::ConnectionPool,
@@ -37,19 +34,7 @@ impl AppRegistry {
         let user_query_service = Arc::new(UserQueryServiceImpl::new(db.clone()));
         let user_domain_query_service = Arc::new(UserDomainQueryServiceImpl::new(db.clone()));
 
-        let author_repository = Arc::new(AuthorRepositoryImpl::new(db.clone()));
-        let author_domain_query_service = Arc::new(AuthorDomainQueryServiceImpl::new(db.clone()));
-        let author_service_registry = Arc::new(AuthorServiceRegistry::new(
-            author_repository,
-            author_domain_query_service,
-        ));
-
-        let book_registry = BookRegistry::new(
-            book_repository,
-            book_query_service,
-            author_service_registry.authors_factory_service(),
-            clock.clone(),
-        );
+        let book_registry = BookRegistry::new(book_repository, book_query_service, clock.clone());
         let user_registry = UserRegistry::new(
             user_repository,
             user_query_service,

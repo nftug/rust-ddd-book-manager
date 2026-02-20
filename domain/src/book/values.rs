@@ -1,4 +1,5 @@
 mod book_author_list;
+mod book_author_name;
 mod book_checkout;
 mod book_description;
 mod book_isbn;
@@ -8,6 +9,7 @@ mod book_title;
 use crate::define_id;
 
 pub use book_author_list::*;
+pub use book_author_name::BookAuthorName;
 pub use book_checkout::{BookCheckout, BookCheckoutList};
 pub use book_description::BookDescription;
 pub use book_isbn::BookIsbn;

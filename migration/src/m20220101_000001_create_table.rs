@@ -31,21 +31,6 @@ impl MigrationTrait for Migration {
         manager
             .create_table(
                 with_audit_columns!(
-                    Authors,
-                    Table::create().table(Authors::Table).if_not_exists().col(
-                        ColumnDef::new(Authors::Name)
-                            .string_len(255)
-                            .not_null()
-                            .unique_key()
-                    )
-                )
-                .to_owned(),
-            )
-            .await?;
-
-        manager
-            .create_table(
-                with_audit_columns!(
                     Books,
                     Table::create()
                         .table(Books::Table)
@@ -73,7 +58,7 @@ impl MigrationTrait for Migration {
                     .table(BookAuthors::Table)
                     .if_not_exists()
                     .col(ColumnDef::new(BookAuthors::BookId).uuid().not_null())
-                    .col(ColumnDef::new(BookAuthors::AuthorId).uuid().not_null())
+                    .col(ColumnDef::new(BookAuthors::Name).string_len(255).not_null())
                     .col(
                         ColumnDef::new(BookAuthors::OrderIndex)
                             .unsigned()
@@ -83,21 +68,13 @@ impl MigrationTrait for Migration {
                         Index::create()
                             .name("pk_book_authors")
                             .col(BookAuthors::BookId)
-                            .col(BookAuthors::AuthorId),
+                            .col(BookAuthors::OrderIndex),
                     )
                     .foreign_key(
                         ForeignKey::create()
                             .name("fk_book_authors_book_id")
                             .from(BookAuthors::Table, BookAuthors::BookId)
                             .to(Books::Table, Books::Id)
-                            .on_delete(ForeignKeyAction::Cascade)
-                            .on_update(ForeignKeyAction::Cascade),
-                    )
-                    .foreign_key(
-                        ForeignKey::create()
-                            .name("fk_book_authors_author_id")
-                            .from(BookAuthors::Table, BookAuthors::AuthorId)
-                            .to(Authors::Table, Authors::Id)
                             .on_delete(ForeignKeyAction::Cascade)
                             .on_update(ForeignKeyAction::Cascade),
                     )
@@ -163,9 +140,6 @@ impl MigrationTrait for Migration {
             .drop_table(Table::drop().table(Books::Table).to_owned())
             .await?;
         manager
-            .drop_table(Table::drop().table(Authors::Table).to_owned())
-            .await?;
-        manager
             .drop_table(Table::drop().table(Users::Table).to_owned())
             .await?;
         Ok(())
@@ -204,23 +178,10 @@ enum Users {
 }
 
 #[derive(DeriveIden)]
-enum Authors {
-    Table,
-    Id,
-    Name,
-    CreatedAt,
-    CreatedById,
-    CreatedByName,
-    UpdatedAt,
-    UpdatedById,
-    UpdatedByName,
-}
-
-#[derive(DeriveIden)]
 enum BookAuthors {
     Table,
     BookId,
-    AuthorId,
+    Name,
     OrderIndex,
 }
 

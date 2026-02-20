@@ -12,7 +12,7 @@ use sea_orm::{
 
 use crate::database::{
     ConnectionPool,
-    entity::{authors, book_authors, book_checkouts, books, users},
+    entity::{book_authors, book_checkouts, books, users},
     log_db_error,
     row::book::{aggregate::*, rows::*},
 };
@@ -30,7 +30,7 @@ impl BookQueryService for BookQueryServiceImpl {
         identity: BookIdentity,
     ) -> Result<Option<BookDetailsDTO>, PersistenceError> {
         let rows = books::Entity::find_by_id(identity.book_id)
-            .inner_join(authors::Entity)
+            .inner_join(book_authors::Entity)
             .inner_join(users::Entity)
             .left_join(book_checkouts::Entity)
             .order_by_asc(book_authors::Column::OrderIndex)
@@ -97,7 +97,7 @@ impl BookQueryService for BookQueryServiceImpl {
             .map_err(log_db_error)?;
 
         let rows = books::Entity::find()
-            .inner_join(authors::Entity)
+            .inner_join(book_authors::Entity)
             .inner_join(users::Entity)
             .left_join(book_checkouts::Entity)
             .filter(
@@ -184,10 +184,9 @@ fn find_by_author_name_expression(name: &str) -> Expr {
     let pattern = format!("%{}%", name);
     books::Column::Id.in_subquery(
         book_authors::Entity::find()
-            .inner_join(authors::Entity)
             .select_only()
             .column(book_authors::Column::BookId)
-            .filter(authors::Column::Name.ilike(&pattern))
+            .filter(book_authors::Column::Name.ilike(&pattern))
             .into_query(),
     )
 }

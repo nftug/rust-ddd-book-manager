@@ -2,7 +2,6 @@
 
 pub mod prelude;
 
-pub mod authors;
 pub mod book_authors;
 pub mod book_checkouts;
 pub mod books;

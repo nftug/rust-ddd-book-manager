@@ -11,7 +11,7 @@ use sea_orm::{
 use crate::{
     database::{
         ConnectionPool,
-        entity::{authors, book_authors, book_checkouts, books, users},
+        entity::{book_authors, book_checkouts, books, users},
         log_db_error,
         row::book::{aggregate::AggregatedBookDetails, rows::BookDetailsRow},
     },
@@ -27,7 +27,7 @@ pub struct BookRepositoryImpl {
 impl BookRepository for BookRepositoryImpl {
     async fn find_by_id(&self, id: BookId) -> Result<Option<Book>, PersistenceError> {
         let rows = books::Entity::find_by_id(id)
-            .inner_join(authors::Entity)
+            .inner_join(book_authors::Entity)
             .inner_join(users::Entity)
             .left_join(book_checkouts::Entity)
             .order_by_asc(book_authors::Column::OrderIndex)
@@ -64,8 +64,8 @@ impl BookRepository for BookRepositoryImpl {
             .iter()
             .map(|author_ref| book_authors::ActiveModel {
                 book_id: Set(book.audit().raw_id()),
-                author_id: Set(author_ref.raw_id()),
                 order_index: Set(author_ref.order_index() as i32),
+                name: Set(author_ref.name().raw().into()),
             });
 
         book_authors::Entity::delete_many()

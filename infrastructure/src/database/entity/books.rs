@@ -19,6 +19,8 @@ pub struct Model {
     pub updated_by_id: Option<Uuid>,
     pub updated_by_name: Option<String>,
     #[sea_orm(has_many)]
+    pub book_authors: HasMany<super::book_authors::Entity>,
+    #[sea_orm(has_many)]
     pub book_checkouts: HasMany<super::book_checkouts::Entity>,
     #[sea_orm(
         belongs_to,
@@ -28,8 +30,6 @@ pub struct Model {
         on_delete = "Cascade"
     )]
     pub users: HasOne<super::users::Entity>,
-    #[sea_orm(has_many, via = "book_authors")]
-    pub authors: HasMany<super::authors::Entity>,
 }
 
 impl ActiveModelBehavior for ActiveModel {}
