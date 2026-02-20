@@ -22,11 +22,11 @@ RUN cargo fetch --locked
 RUN cargo build -p api --release --locked
 
 # Deployment stage
-FROM gcr.io/distroless/cc:nonroot
+FROM gcr.io/distroless/cc-debian12:nonroot
 
 WORKDIR /app
 
-COPY --from=builder /workspace/target/release/api /app/api
+COPY --from=builder --chown=nonroot:nonroot /workspace/target/release/api /app/api
 
 ENV PORT=8080
 EXPOSE 8080
