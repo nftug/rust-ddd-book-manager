@@ -8,17 +8,9 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub book_id: Uuid,
+    pub name: String,
     #[sea_orm(primary_key, auto_increment = false)]
-    pub author_id: Uuid,
     pub order_index: i32,
-    #[sea_orm(
-        belongs_to,
-        from = "author_id",
-        to = "id",
-        on_update = "Cascade",
-        on_delete = "Cascade"
-    )]
-    pub authors: HasOne<super::authors::Entity>,
     #[sea_orm(
         belongs_to,
         from = "book_id",

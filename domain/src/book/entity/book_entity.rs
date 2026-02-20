@@ -1,7 +1,6 @@
 use crate::{
     audit::{Actor, AuditContext, EntityAudit},
     auth::permission::{AdminPermission, EntityPermission, Permission},
-    author::values::AuthorReference,
     book::values::*,
     shared::error::DomainError,
     user::values::UserReference,
@@ -44,7 +43,7 @@ impl Book {
     pub fn hydrate(
         audit: EntityAudit<BookId>,
         title: String,
-        authors: Vec<(AuthorReference, usize)>,
+        authors: Vec<(BookAuthorName, usize)>,
         isbn: Option<String>,
         description: Option<String>,
         owner: UserReference,

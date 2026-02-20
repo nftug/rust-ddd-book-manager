@@ -2,17 +2,14 @@ use chrono::{DateTime, Utc};
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::{
-    author::dto::AuthorSummaryDTO,
-    shared::{AuditDTO, AuditSummaryDTO, PaginationDTO, UserReferenceDTO},
-};
+use crate::shared::{AuditDTO, AuditSummaryDTO, PaginationDTO, UserReferenceDTO};
 
 #[derive(Debug, Serialize, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct BookDetailsDTO {
     pub id: Uuid,
     pub title: String,
-    pub authors: Vec<AuthorSummaryDTO>,
+    pub authors: Vec<String>,
     pub isbn: Option<String>,
     pub description: Option<String>,
     pub owner: UserReferenceDTO,
@@ -33,7 +30,7 @@ pub struct BookCheckoutDTO {
 pub struct BookListItemDTO {
     pub id: Uuid,
     pub title: String,
-    pub authors: Vec<AuthorSummaryDTO>,
+    pub authors: Vec<String>,
     pub owner: UserReferenceDTO,
     pub checked_out: bool,
     pub audit: AuditSummaryDTO,

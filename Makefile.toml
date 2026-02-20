@@ -84,3 +84,13 @@ extend = "set-env-local"
 install_crate = { crate_name = "sea-orm-cli", binary = "sea-orm-cli", test_arg = "--help" }
 command = "sea-orm-cli"
 args = ["${@}"]
+
+[tasks.clean]
+extend = "set-env-local"
+command = "cargo"
+args = ["clean", "${@}"]
+
+[tasks.docker-build]
+extend = "set-env-local"
+command = "docker"
+args = ["build", "-t", "book-manager-api", "."]

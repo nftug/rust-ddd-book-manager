@@ -1,9 +1,9 @@
 use crate::shared::error::DomainError;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct AuthorName(String);
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct BookAuthorName(String);
 
-impl AuthorName {
+impl BookAuthorName {
     pub fn hydrate(name: String) -> Self {
         Self(name)
     }
@@ -13,7 +13,7 @@ impl AuthorName {
     }
 }
 
-impl TryFrom<String> for AuthorName {
+impl TryFrom<String> for BookAuthorName {
     type Error = DomainError;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
