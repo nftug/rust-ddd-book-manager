@@ -35,8 +35,8 @@ pub struct PermissionDTO {
     pub can_delete: bool,
 }
 
-impl From<&dyn Permission> for PermissionDTO {
-    fn from(permission: &dyn Permission) -> Self {
+impl<T: Permission> From<T> for PermissionDTO {
+    fn from(permission: T) -> Self {
         PermissionDTO {
             can_update: permission.can_update(),
             can_delete: permission.can_delete(),

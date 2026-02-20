@@ -41,7 +41,7 @@ impl BookQueryService for BookQueryServiceImpl {
 
         Ok(AggregatedBookDetails::from_rows(rows).map(|agg| {
             let permission = EntityPermission::new(actor, agg.row.created_by_id.into());
-            agg.to_dto(&permission)
+            agg.to_dto(permission)
         }))
     }
 
@@ -125,7 +125,7 @@ impl BookQueryService for BookQueryServiceImpl {
                 .into_iter()
                 .map(|book| {
                     let permission = EntityPermission::new(actor, book.row.user.id.into());
-                    book.to_dto(&permission)
+                    book.to_dto(permission)
                 })
                 .collect(),
         })

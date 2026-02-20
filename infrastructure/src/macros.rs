@@ -27,7 +27,7 @@ macro_rules! hydrate_audit_dto {
                     id,
                     name: $model.updated_by_name.clone().unwrap_or_default(),
                 }),
-            permission: ($permission as &dyn domain::auth::permission::Permission).into(),
+            permission: $permission.into(),
         }
     };
 }
@@ -37,7 +37,7 @@ macro_rules! hydrate_audit_summary_dto {
         application::shared::AuditSummaryDTO {
             created_at: $model.created_at.into(),
             updated_at: $model.updated_at.map(|dt| dt.into()),
-            permission: ($permission as &dyn domain::auth::permission::Permission).into(),
+            permission: $permission.into(),
         }
     };
 }

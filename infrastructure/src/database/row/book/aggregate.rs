@@ -39,7 +39,7 @@ impl AggregatedBookDetails {
         })
     }
 
-    pub fn to_dto(self, permission: &dyn Permission) -> BookDetailsDTO {
+    pub fn to_dto<T: Permission>(self, permission: T) -> BookDetailsDTO {
         BookDetailsDTO {
             id: self.row.id,
             title: self.row.title,
@@ -111,7 +111,7 @@ impl AggregatedBookListItem {
             .collect()
     }
 
-    pub fn to_dto(self, permission: &dyn Permission) -> BookListItemDTO {
+    pub fn to_dto<T: Permission>(self, permission: T) -> BookListItemDTO {
         BookListItemDTO {
             id: self.row.id,
             title: self.row.title,
