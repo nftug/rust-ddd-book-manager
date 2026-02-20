@@ -32,8 +32,11 @@ impl GetOrCreateActorService {
         {
             // If the user info from the request is different from the existing user, update it
             if actor.name() != request.name || actor.role() != request.role.into() {
-                let mut user_from_request =
-                    self.user_repository.find_by_id(request.id).await?.unwrap();
+                let mut user_from_request = self
+                    .user_repository
+                    .find_by_id(request.id)
+                    .await?
+                    .ok_or(ApplicationError::InternalError("User not found".into()))?;
 
                 user_from_request.update(
                     &context,
