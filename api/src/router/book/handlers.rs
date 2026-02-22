@@ -11,9 +11,7 @@ use crate::{auth::OidcUserInfo, error::ApiError, registry::AppRegistry};
 
 #[tracing::instrument(
     skip(registry, user_info),
-    fields(
-        user_id = ?user_info.as_ref().map(|u| u.id),
-    ),
+    fields(user_id = ?user_info.as_ref().map(|u| u.id)),
     err
 )]
 pub async fn get_book_details(
@@ -34,9 +32,7 @@ pub async fn get_book_details(
 
 #[tracing::instrument(
     skip(registry, user_info),
-    fields(
-        user_id = ?user_info.as_ref().map(|u| u.id),
-    ),
+    fields(user_id = ?user_info.as_ref().map(|u| u.id)),
     err
 )]
 pub async fn get_book_list(
@@ -57,9 +53,7 @@ pub async fn get_book_list(
 
 #[tracing::instrument(
     skip(registry, user_info),
-    fields(
-        user_id = %user_info.id,
-    ),
+    fields(user_id = %user_info.id),
     err
 )]
 pub async fn create_book(
@@ -80,9 +74,7 @@ pub async fn create_book(
 
 #[tracing::instrument(
     skip(registry, user_info),
-    fields(
-        user_id = %user_info.id,
-    ),
+    fields(user_id = %user_info.id),
     err
 )]
 pub async fn update_book(
@@ -104,9 +96,7 @@ pub async fn update_book(
 
 #[tracing::instrument(
     skip(registry, user_info),
-    fields(
-        user_id = %user_info.id,
-    ),
+    fields(user_id = %user_info.id),
     err
 )]
 pub async fn delete_book(
@@ -127,9 +117,7 @@ pub async fn delete_book(
 
 #[tracing::instrument(
     skip(registry, user_info),
-    fields(
-        user_id = %user_info.id,
-    ),
+    fields(user_id = %user_info.id),
     err
 )]
 pub async fn get_checkout_history(
@@ -151,9 +139,7 @@ pub async fn get_checkout_history(
 
 #[tracing::instrument(
     skip(registry, user_info),
-    fields(
-        user_id = %user_info.id,
-    ),
+    fields(user_id = %user_info.id),
     err
 )]
 pub async fn checkout_book(
@@ -174,9 +160,7 @@ pub async fn checkout_book(
 
 #[tracing::instrument(
     skip(registry, user_info),
-    fields(
-        user_id = %user_info.id,
-    ),
+    fields(user_id = %user_info.id),
     err
 )]
 pub async fn return_book(

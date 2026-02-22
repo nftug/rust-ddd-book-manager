@@ -6,9 +6,7 @@ use crate::{auth::OidcUserInfo, error::ApiError, registry::AppRegistry};
 
 #[tracing::instrument(
     skip(registry, user_info),
-    fields(
-        user_id = %user_info.id,
-    ),
+    fields(user_id = %user_info.id),
     err
 )]
 pub async fn get_me_details(
